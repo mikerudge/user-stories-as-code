@@ -1,0 +1,169 @@
+import { Platform } from './platforms';
+import Task from './task';
+import UserType from './userType';
+import uniqid from 'uniqid';
+import { Epic } from './epic';
+import Department from './department';
+
+export type UserStoryProps = {
+  iWant?: string;
+  asA?: UserType;
+  soICan?: string;
+  points?: number;
+  platform?: Platform;
+  dueDate?: Date;
+  labels?: string[];
+  description?: string;
+  epic?: Epic;
+  departments?: Department[];
+};
+// A class that allows users to add new user stories
+export default class UserStory {
+  iWant: string;
+  asA: UserType | undefined;
+  soICan: string | undefined;
+  summary: string | undefined;
+  description: string | undefined;
+  platform: Platform | undefined;
+  labels: string[] | undefined;
+  dueDate: Date | undefined;
+  tasks: Task[];
+  id: string;
+  epic: Epic | undefined;
+  departments: Department[];
+
+  constructor(public props?: UserStoryProps) {
+    this.iWant = props?.iWant ?? 'New User Story';
+    this.asA = props?.asA;
+    this.soICan = props?.soICan ?? '';
+    this.description = props?.description;
+    this.labels = props?.labels;
+    this.platform = props?.platform;
+    this.dueDate = props?.dueDate;
+    this.tasks = [];
+    this.id = uniqid();
+    this.epic = props?.epic;
+    this.departments = props?.departments ?? [];
+    this.summary = this._generateSummary();
+  }
+
+  public AsA = (who: UserType): UserStory => {
+    this.asA = who;
+    this._generateSummary();
+    return this;
+  };
+
+  public IWant = (what: string): UserStory => {
+    this.iWant = what;
+    this._generateSummary();
+
+    return this;
+  };
+
+  public SoThat = (why: string): UserStory => {
+    this.soICan = why;
+    this._generateSummary();
+
+    return this;
+  };
+
+  public setPlatform = (platform: Platform): UserStory => {
+    this.platform = platform;
+    return this;
+  };
+
+  addEpic = (epic: Epic): UserStory => {
+    this.epic = epic;
+    return this;
+  };
+
+  /**
+   * @description
+   * @author Mike Rudge
+   * @date 06/11/2021
+   * @param {Task} task
+   * @memberof UserStory
+   */
+  public addTask = (task: Task): UserStory => {
+    // Check to make sure task is not already added
+    if (!this.tasks.includes(task)) {
+      const taskWithStory = task.setUserStory(this);
+      this.tasks?.push(taskWithStory);
+    }
+    return this;
+  };
+
+  /**
+   * @description
+   * @author Mike Rudge
+   * @date 06/11/2021
+   * @param {Task[]} tasks
+   * @memberof UserStory
+   */
+  public addManyTasks = (tasks: Task[]): UserStory => {
+    tasks.forEach((task) => {
+      this.addTask(task);
+    });
+    return this;
+  };
+
+  public addDepartment = (department: Department): UserStory => {
+    if (!this.departments.includes(department)) {
+      this.departments.push(department);
+    }
+    return this;
+  };
+
+  public addManyDepartments = (departments: Department[]): UserStory => {
+    departments.forEach((department) => {
+      this.addDepartment(department);
+    });
+    return this;
+  };
+
+  // Capitalise the first letter of a string
+  private _capitalise = (input: string): string => {
+    return input.charAt(0).toUpperCase() + input.slice(1);
+  };
+
+  private _generateSummary = (): string => {
+    this.summary = '';
+
+    if (this.asA?.name) {
+      this.summary += `As a ${this.asA.name}`;
+    }
+
+    if (this.iWant) {
+      this.summary += `, I want to ${this.iWant}`;
+    }
+
+    if (this.soICan) {
+      this.summary += `, so I can ${this.soICan}`;
+    }
+
+    this.summary = this._capitalise(this.summary);
+    return this.summary;
+  };
+
+  public create = () => {
+    if (!this.iWant) {
+      throw new Error('No user type specified');
+    }
+
+    if (!this.AsA) {
+      throw new Error('No what specified');
+    }
+    this._generateSummary();
+    return {
+      id: this.id,
+      summary: this.summary,
+
+      tasks: this.tasks ?? [],
+      userType: this.asA?.name ?? '',
+      departments: this.departments,
+      epic: this.epic ? { id: this.epic?.id ?? '', name: this.epic?.name ?? '' } : null,
+    };
+
+    // return this.summary;
+  };
+}
