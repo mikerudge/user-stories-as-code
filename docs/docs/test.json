@@ -1,0 +1,111 @@
+{
+  "id": "enfwtx6dokvpucv9n",
+  "name": "Fabric",
+  "stories": [
+    {
+      "id": "enfwtx6dokvpucv9o",
+      "summary": "As a Admin, I want to to be able to code a story, so I can Easily create stories using code",
+      "userType": "Admin"
+    },
+    {
+      "id": "enfwtx6dokvpucv9b",
+      "summary": "As a Admin, I want to to be able to create a new project, so I can I can start working on it",
+      "userType": "Admin"
+    },
+    {
+      "id": "enfwtx6dokvpucv9p",
+      "summary": "As a Admin, I want to Create Users, so I can create a new record",
+      "userType": "Admin"
+    },
+    {
+      "id": "enfwtx6dokvpucv9r",
+      "summary": "As a Admin, I want to List all Users, so I can easily navigate",
+      "userType": "Admin"
+    },
+    {
+      "id": "enfwtx6dokvpucv9s",
+      "summary": "As a Admin, I want to See a single User, so I can see more in depth information",
+      "userType": "Admin"
+    },
+    {
+      "id": "enfwtx6dokvpucv9t",
+      "summary": "As a Admin, I want to to be able to link others directly to User, so I can share links on other platforms",
+      "userType": "Admin"
+    },
+    {
+      "id": "enfwtx6dokvpucv9u",
+      "summary": "As a Admin, I want to update Users, so I can change information",
+      "userType": "Admin"
+    },
+    {
+      "id": "enfwtx6dokvpucv9v",
+      "summary": "As a Admin, I want to delete Users, so I can remove unwanted Users",
+      "userType": "Admin"
+    },
+    {
+      "id": "enfwtx6dokvpucv9w",
+      "summary": "As a Admin, I want to List all Houses, so I can easily navigate",
+      "userType": "Admin"
+    },
+    {
+      "id": "enfwtx6dokvpucv9x",
+      "summary": "As a Admin, I want to See a single House, so I can see more in depth information",
+      "userType": "Admin"
+    },
+    {
+      "id": "enfwtx6dokvpucv9y",
+      "summary": "As a Admin, I want to to be able to link others directly to House, so I can share links on other platforms",
+      "userType": "Admin"
+    },
+    {
+      "id": "enfwtx6dokvpucva0",
+      "summary": "As a Business Owner, I want to to be able to view Houses that belong to me, so I can view all records",
+      "userType": "Business Owner"
+    },
+    {
+      "id": "enfwtx6dokvpucva1",
+      "summary": "As a Business Owner, I want to See a single House if I am the owner, so I can see more in depth information",
+      "userType": "Business Owner"
+    },
+    {
+      "id": "enfwtx6dokvpucva2",
+      "summary": "As a Business Owner, I want to See a permission denied message for House if I am not owner, so I can know I dont have access",
+      "userType": "Business Owner"
+    },
+    {
+      "id": "enfwtx6dokvpucva3",
+      "summary": "As a Business Owner, I want to to be able to link others directly to House, so I can share links on other platforms",
+      "userType": "Business Owner"
+    },
+    {
+      "id": "enfwtx6dokvpucva4",
+      "summary": "As a Admin, I want to Create Tasks, so I can create a new record",
+      "userType": "Admin"
+    },
+    {
+      "id": "enfwtx6dokvpucva6",
+      "summary": "As a Admin, I want to List all Tasks, so I can easily navigate",
+      "userType": "Admin"
+    },
+    {
+      "id": "enfwtx6dokvpucva7",
+      "summary": "As a Admin, I want to See a single Task, so I can see more in depth information",
+      "userType": "Admin"
+    },
+    {
+      "id": "enfwtx6dokvpucva8",
+      "summary": "As a Admin, I want to to be able to link others directly to Task, so I can share links on other platforms",
+      "userType": "Admin"
+    },
+    {
+      "id": "enfwtx6dokvpucva9",
+      "summary": "As a Admin, I want to update Tasks, so I can change information",
+      "userType": "Admin"
+    },
+    {
+      "id": "enfwtx6dokvpucvaa",
+      "summary": "As a Admin, I want to delete Tasks, so I can remove unwanted Tasks",
+      "userType": "Admin"
+    }
+  ]
+}

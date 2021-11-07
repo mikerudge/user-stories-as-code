@@ -5,12 +5,12 @@ import UserType from '../userType';
 
 it('Should create CRUD stories models', () => {
   const restrictedUser = new UserType({ name: 'RestrictedUser' }).addPermissions({
-    actions: 'read',
+    actions: ['read'],
     condition: 'owner',
   });
 
   const adminUser = new UserType({ name: 'Admin' }).addPermissions({
-    actions: 'all',
+    actions: ['all'],
   });
 
   const userModel = new Model({ name: 'User' });
@@ -18,30 +18,29 @@ it('Should create CRUD stories models', () => {
   const Organisations = new Model({ name: 'Organisation' });
   const sharedLinks = new Model({ name: 'Shared Links' });
 
-  if (restrictedUser.permissions) {
-    userModel.addPermission(restrictedUser.permissions);
-    todoModel.addPermission(restrictedUser.permissions);
-    Organisations.addPermission(restrictedUser.permissions);
-    sharedLinks.addPermission(restrictedUser.permissions);
-  }
-
-  if (adminUser.permissions) {
-    userModel.addPermission(adminUser.permissions);
-    todoModel.addPermission(adminUser.permissions);
-    Organisations.addPermission(adminUser.permissions);
-    sharedLinks.addPermission(adminUser.permissions);
-  }
+  userModel.addUserType([restrictedUser, adminUser]);
+  todoModel.addUserType([restrictedUser, adminUser]);
+  Organisations.addUserType([restrictedUser, adminUser]);
+  sharedLinks.addUserType([restrictedUser, adminUser]);
 
   const project = new Project({ name: 'test' })
     .addModel(userModel)
+    // Should deduplicate the models
+    .addModel(userModel)
+    .addModel(todoModel)
     .addModel(todoModel)
     .addModel(Organisations)
+    .addModel(Organisations)
+    .addModel(sharedLinks)
     .addModel(sharedLinks)
     .generateCrudStories();
 
+  const models = project.models;
+  expect(models.size).toBe(4);
+
   const stories = project.stories;
 
-  expect(stories.length).toBe(16);
+  expect(stories.size).toBe(40);
   // const story = stories[0];
   // expect(story.summary).toContain('not');
 });

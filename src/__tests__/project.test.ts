@@ -11,9 +11,9 @@ it('should output a csv', () => {
   const todoModel = new Model({ name: 'Todo' });
 
   const story = new UserStory()
-    .AsA(restrictedUser)
-    .IWant('to read')
-    .SoThat('I can read')
+    .setAsA(restrictedUser)
+    .setIWant('to read')
+    .setSoThat('I can read')
     .addTask(new Task({ name: 'get a book' }));
 
   const project = new Project({ name: 'test' })

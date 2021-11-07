@@ -19,18 +19,18 @@ export type UserStoryProps = {
 };
 // A class that allows users to add new user stories
 export default class UserStory {
+  readonly id: string;
   iWant: string;
   asA: UserType | undefined;
   soICan: string | undefined;
-  summary: string | undefined;
-  description: string | undefined;
-  platform: Platform | undefined;
   labels: string[] | undefined;
   dueDate: Date | undefined;
-  tasks: Task[];
-  id: string;
-  epic: Epic | undefined;
-  departments: Department[];
+  public summary: string | undefined;
+  public platform: Platform | undefined;
+  public description: string | undefined;
+  public tasks: Task[];
+  public epic: Epic | undefined;
+  public departments: Set<Department>;
 
   constructor(public props?: UserStoryProps) {
     this.iWant = props?.iWant ?? 'New User Story';
@@ -43,24 +43,24 @@ export default class UserStory {
     this.tasks = [];
     this.id = uniqid();
     this.epic = props?.epic;
-    this.departments = props?.departments ?? [];
+    this.departments = new Set(props?.departments);
     this.summary = this._generateSummary();
   }
 
-  public AsA = (who: UserType): UserStory => {
+  public setAsA = (who: UserType): UserStory => {
     this.asA = who;
     this._generateSummary();
     return this;
   };
 
-  public IWant = (what: string): UserStory => {
+  public setIWant = (what: string): UserStory => {
     this.iWant = what;
     this._generateSummary();
 
     return this;
   };
 
-  public SoThat = (why: string): UserStory => {
+  public setSoThat = (why: string): UserStory => {
     this.soICan = why;
     this._generateSummary();
 
@@ -108,9 +108,8 @@ export default class UserStory {
   };
 
   public addDepartment = (department: Department): UserStory => {
-    if (!this.departments.includes(department)) {
-      this.departments.push(department);
-    }
+    this.departments.add(department);
+
     return this;
   };
 
@@ -145,25 +144,23 @@ export default class UserStory {
     return this.summary;
   };
 
-  public create = () => {
+  public create = (): string => {
     if (!this.iWant) {
       throw new Error('No user type specified');
     }
 
-    if (!this.AsA) {
+    if (!this.asA) {
       throw new Error('No what specified');
     }
     this._generateSummary();
-    return {
-      id: this.id,
-      summary: this.summary,
 
-      tasks: this.tasks ?? [],
+    const out = {
+      id: this.id.toString(),
+      summary: this.summary?.toString(),
       userType: this.asA?.name ?? '',
-      departments: this.departments,
-      epic: this.epic ? { id: this.epic?.id ?? '', name: this.epic?.name ?? '' } : null,
     };
 
+    return JSON.stringify(out);
     // return this.summary;
   };
 }

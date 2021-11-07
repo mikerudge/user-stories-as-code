@@ -2,29 +2,32 @@ import json2csv from 'json2csv';
 import uniqid from 'uniqid';
 
 import Department from './department';
+import { Epic } from './epic';
 import { Model } from './models';
+import { Platform } from './platforms';
 import Task from './task';
 import UserStory from './userStory';
 import UserType, { UserTypeProps } from './userType';
 
 export type ProjectProps = {
   name: string;
+  userTypes?: UserType[];
 };
 
 export default class Project {
-  name: string;
-  userTypes: UserType[];
-  stories: UserStory[];
-  departments: Department[];
-  models: Model[];
-  id: string;
+  readonly id: string;
+  readonly name: string = '';
+  userTypes: Set<UserType> = new Set();
+  stories: Set<UserStory> = new Set();
+  departments: Set<Department> = new Set();
+  models: Set<Model> = new Set();
+  platforms: Set<Platform> = new Set();
+  epics: Set<Epic> = new Set();
+
   constructor(props: ProjectProps) {
-    this.name = props.name;
-    this.stories = [];
-    this.departments = [];
-    this.userTypes = [];
-    this.models = [];
     this.id = uniqid();
+    this.name = props.name;
+    this.userTypes = new Set(props.userTypes);
   }
 
   /**
@@ -33,9 +36,20 @@ export default class Project {
    * @returns {Project} project
    */
   addStory = (story: UserStory): Project => {
-    if (!this.stories.some(({ id }) => id === story.id)) {
-      this.stories.push(story);
+    this.stories.add(story);
+
+    if (story.departments.size > 0) {
+      story.departments.forEach((department) => this.addDepartment(department));
     }
+
+    if (story.epic) {
+      this.epics.add(story.epic);
+    }
+
+    if (story.platform) {
+      this.addPlatform(story.platform);
+    }
+
     return this;
   };
 
@@ -52,12 +66,29 @@ export default class Project {
   };
 
   /**
+   * @description add a platform to the project
+   * @author Mike Rudge
+   * @date 07/11/2021
+   * @param {Platform} platform
+   * @memberof Project
+   */
+  addPlatform = (platform: Platform): Project => {
+    this.platforms.add(platform);
+    return this;
+  };
+
+  addManyPlatforms = (platforms: Platform[]): Project => {
+    platforms.forEach((platform) => this.addPlatform(platform));
+    return this;
+  };
+
+  /**
    * @description Allows users to add a new department to the project
    * @param name
    * @returns
    */
   addDepartment = (department: Department): Project => {
-    this.departments.push(department);
+    this.departments.add(department);
     return this;
   };
 
@@ -77,8 +108,8 @@ export default class Project {
    * @param params UserTypeProps
    * @returns
    */
-  addUserType = (params: UserTypeProps): Project => {
-    this.userTypes.push(new UserType(params));
+  addUserType = (userType: UserType): Project => {
+    this.userTypes.add(userType);
     return this;
   };
 
@@ -88,8 +119,8 @@ export default class Project {
    * @returns {Project}
    * @memberof Project
    */
-  addManyUserTypes = (params: UserTypeProps[]): Project => {
-    params.forEach((type) => this.addUserType(type));
+  addManyUserTypes = (userTypes: UserType[]): Project => {
+    userTypes.forEach((type) => this.addUserType(type));
     return this;
   };
 
@@ -101,7 +132,7 @@ export default class Project {
    * @memberof Project
    */
   addModel = (model: Model): Project => {
-    this.models.push(model);
+    this.models.add(model);
     return this;
   };
 
@@ -135,7 +166,7 @@ export default class Project {
         });
         this.addStory(story);
 
-        if (this.departments.length > 0) {
+        if (this.departments.size > 0) {
           this.departments.forEach((department) => {
             const createTask = new Task({ name: `${department.name} to work on create screens for ${model.name}s` });
             story.addTask(createTask);
@@ -254,17 +285,13 @@ export default class Project {
   readonly outputStories = (
     type: 'csv' | 'json' = 'json',
   ): string | undefined | { id: string | undefined; summary: string | undefined }[] => {
-    const csvJson = this.stories.map((story) => {
-      return {
+    const csvJson: { id: string; summary: string | undefined }[] = [];
+
+    this.stories.forEach((story) => {
+      csvJson.push({
         id: story.id,
         summary: story.summary,
-        tasks: story.tasks.map((task) => {
-          return {
-            id: task.id,
-            summary: task.name,
-          };
-        }),
-      };
+      });
     });
 
     if (type === 'csv') {
@@ -275,14 +302,13 @@ export default class Project {
 
     return csvJson;
   };
-
   create = () => {
+    const stories: string[] = [];
+    this.stories.forEach((story) => stories.push(story.create()));
     return {
       id: this.id,
       name: this.name,
-      userTypes: this.userTypes.map((userType) => userType.create()),
-      stories: this.stories.map((story) => story.create()),
-      departments: this.departments.map((department) => department.create()),
+      stories: stories,
     };
   };
 }

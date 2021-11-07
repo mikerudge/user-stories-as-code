@@ -10,19 +10,22 @@ export class Model {
   id: string;
   name: string | undefined;
 
-  canCreate: Permission[] = [];
-  canRead: Permission[] = [];
-  canUpdate: Permission[] = [];
-  canDelete: Permission[] = [];
+  canCreate: Set<Permission> = new Set();
+  canRead: Set<Permission> = new Set();
+  canUpdate: Set<Permission> = new Set();
+  canDelete: Set<Permission> = new Set();
 
-  cannotCreate: Permission[] = [];
-  cannotRead: Permission[] = [];
-  cannotUpdate: Permission[] = [];
-  cannotDelete: Permission[] = [];
+  cannotCreate: Set<Permission> = new Set();
+  cannotRead: Set<Permission> = new Set();
+  cannotUpdate: Set<Permission> = new Set();
+  cannotDelete: Set<Permission> = new Set();
+
+  userTypes: Set<UserType>;
 
   constructor(props?: ModelProps) {
     this.id = uniqid();
     this.name = props?.name;
+    this.userTypes = new Set();
   }
 
   /**
@@ -44,13 +47,31 @@ export class Model {
       update: this.addUpdate,
       delete: this.addDelete,
     };
-    // if actions is an array of actions, loop through and add each one
-    if (Array.isArray(permission.actions)) {
-      permission.actions.forEach((action) => {
-        return levelObject[action](permission);
+
+    permission.actions.forEach((action) => {
+      return levelObject[action](permission);
+    });
+
+    return this;
+  };
+
+  private _addUserTypeToModel = (userType: UserType): Model => {
+    this.userTypes.add(userType);
+
+    if (userType.permissions) {
+      this.addPermission(userType.permissions);
+    }
+
+    return this;
+  };
+
+  public readonly addUserType = (userType: UserType | UserType[]): Model => {
+    if (Array.isArray(userType)) {
+      userType.forEach((user) => {
+        this._addUserTypeToModel(user);
       });
-    } else if (typeof permission.actions === 'string') {
-      levelObject[permission.actions](permission);
+    } else {
+      this._addUserTypeToModel(userType);
     }
     return this;
   };
@@ -70,9 +91,21 @@ export class Model {
 
   private addCreate = (permission: Permission): Model => {
     if (permission.can) {
-      this.canCreate.push(permission);
+      // if permission.userType is already  in the this.canCreate set then remove the only one first,
+      this.canCreate.forEach((perm) => {
+        if (perm.userType === permission.userType) {
+          this.canCreate.delete(perm);
+        }
+      });
+      // then add the new one
+      this.canCreate.add(permission);
     } else {
-      this.cannotCreate.push(permission);
+      this.cannotCreate.forEach((perm) => {
+        if (perm.userType === permission.userType) {
+          this.canCreate.delete(perm);
+        }
+      });
+      this.cannotCreate.add(permission);
     }
 
     return this;
@@ -80,27 +113,27 @@ export class Model {
 
   private addUpdate = (permission: Permission): Model => {
     if (permission.can) {
-      this.canUpdate.push(permission);
+      this.canUpdate.add(permission);
     } else {
-      this.cannotUpdate.push(permission);
+      this.cannotUpdate.add(permission);
     }
     return this;
   };
 
   private addDelete = (permission: Permission): Model => {
     if (permission.can) {
-      this.canDelete.push(permission);
+      this.canDelete.add(permission);
     } else {
-      this.cannotDelete.push(permission);
+      this.cannotDelete.add(permission);
     }
     return this;
   };
 
   private addRead = (permission: Permission): Model => {
     if (permission.can) {
-      this.canRead.push(permission);
+      this.canRead.add(permission);
     } else {
-      this.cannotRead.push(permission);
+      this.cannotRead.add(permission);
     }
     return this;
   };
