@@ -4,6 +4,7 @@ import UserType from './userType';
 import uniqid from 'uniqid';
 import { Epic } from './epic';
 import Department from './department';
+import Sprint from './sprint';
 
 export type UserStoryProps = {
   iWant?: string;
@@ -16,6 +17,7 @@ export type UserStoryProps = {
   description?: string;
   epic?: Epic;
   departments?: Department[];
+  sprint?: Sprint;
 };
 // A class that allows users to add new user stories
 export default class UserStory {
@@ -31,6 +33,7 @@ export default class UserStory {
   public tasks: Task[];
   public epic: Epic | undefined;
   public departments: Set<Department>;
+  public sprint: Sprint | undefined;
 
   constructor(public props?: UserStoryProps) {
     this.iWant = props?.iWant ?? 'New User Story';
@@ -45,6 +48,7 @@ export default class UserStory {
     this.epic = props?.epic;
     this.departments = new Set(props?.departments);
     this.summary = this._generateSummary();
+    this.sprint = props?.sprint;
   }
 
   public setAsA = (who: UserType): UserStory => {
@@ -69,6 +73,11 @@ export default class UserStory {
 
   public setPlatform = (platform: Platform): UserStory => {
     this.platform = platform;
+    return this;
+  };
+
+  public readonly setSprint = (sprint: Sprint): UserStory => {
+    this.sprint = sprint;
     return this;
   };
 

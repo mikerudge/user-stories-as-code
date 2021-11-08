@@ -6,6 +6,7 @@ import Permission from '../permissions';
 import Task from '../task';
 import UserStory from '../userStory';
 import UserType from '../userType';
+import CRUDStories from '../CRUDStories';
 
 it('Create a new project', () => {
   // Define the different user types in the project
@@ -38,19 +39,22 @@ it('Create a new project', () => {
 
   // Create a new project that puts it all together
   const project = new Project({ name: 'Awesome Sauce' })
-    // Can also add custom stories in line
     .addStory(
       new UserStory({ asA: admin, iWant: 'to be able to code a story', soICan: 'Easily create stories using code' }),
     )
+    .addStory(firstUserStory);
+
+  new CRUDStories(project)
     .addModel(organisation)
     .addModel(userModel)
     .addModel(authorModel)
     .addModel(taskModel)
     .addModel(bookModel)
-    .addStory(firstUserStory)
-    .generateCrudStories()
-    .create();
+    .generate();
 
+  project.create();
+
+  console.log('stories.size', project.stories.size);
   console.log('project', JSON.stringify(project, null, 2));
 
   expect(project.name).toBe('Awesome Sauce');

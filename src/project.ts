@@ -1,10 +1,12 @@
 import json2csv from 'json2csv';
 import uniqid from 'uniqid';
+import CRUDStories from './CRUDStories';
 
 import Department from './department';
 import { Epic } from './epic';
 import { Model } from './models';
 import { Platform } from './platforms';
+import Sprint from './sprint';
 import Task from './task';
 import UserStory from './userStory';
 import UserType, { UserTypeProps } from './userType';
@@ -20,9 +22,9 @@ export default class Project {
   userTypes: Set<UserType> = new Set();
   stories: Set<UserStory> = new Set();
   departments: Set<Department> = new Set();
-  models: Set<Model> = new Set();
   platforms: Set<Platform> = new Set();
   epics: Set<Epic> = new Set();
+  sprints: Set<Sprint> = new Set();
 
   constructor(props: ProjectProps) {
     this.id = uniqid();
@@ -48,6 +50,10 @@ export default class Project {
 
     if (story.platform) {
       this.addPlatform(story.platform);
+    }
+
+    if (story.sprint) {
+      this.sprints.add(story.sprint);
     }
 
     return this;
@@ -124,160 +130,6 @@ export default class Project {
     return this;
   };
 
-  /**
-   * @description Add model to the project
-   * @author Mike Rudge
-   * @date 06/11/2021
-   * @param {Model} model
-   * @memberof Project
-   */
-  addModel = (model: Model): Project => {
-    this.models.add(model);
-    return this;
-  };
-
-  /**
-   * @description
-   * @author Mike Rudge
-   * @date 06/11/2021
-   * @param {Model[]} models
-   * @memberof Project
-   */
-  addManyModels = (models: Model[]): Project => {
-    models.forEach((model) => this.addModel(model));
-    return this;
-  };
-
-  /**
-   * @description Generates CRUD stories for the project based on user permissions and models
-   * @returns {Project}
-   * @memberof Project
-   * @author Mike Rudge
-   */
-  generateCrudStories = (): Project => {
-    this.models.forEach((model) => {
-      /* -------------------------- Create Users stories -------------------------- */
-      const createUsers = model.canCreate;
-      createUsers.forEach((permission) => {
-        const story = new UserStory({
-          asA: permission.userType,
-          iWant: `Create ${model.name}s`,
-          soICan: 'create a new record',
-        });
-        this.addStory(story);
-
-        if (this.departments.size > 0) {
-          this.departments.forEach((department) => {
-            const createTask = new Task({ name: `${department.name} to work on create screens for ${model.name}s` });
-            story.addTask(createTask);
-          });
-        }
-      });
-
-      const denyCreateUsers = model.cannotCreate;
-
-      denyCreateUsers.forEach((permission) => {
-        const story = new UserStory({
-          asA: permission.userType,
-          iWant: `to be denied access to creating ${model.name}`,
-          soICan: '',
-        });
-        this.addStory(story);
-      });
-
-      /* --------------------------- Read Users stories --------------------------- */
-
-      model.canRead.forEach((permission) => {
-        if (permission.condition === 'owner') {
-          const ownerTask = new Task({ name: `Reject requests for ${model.name} if the user is not the owner` });
-          this.addStory(
-            new UserStory({
-              asA: permission.userType,
-              iWant: `to be able to view ${model.name}s that belong to me`,
-              soICan: 'view all records',
-            }).addTask(ownerTask),
-          );
-
-          this.addStory(
-            new UserStory({
-              asA: permission.userType,
-              iWant: `See a single ${model.name} if I am the owner`,
-              soICan: 'see more in depth information',
-            }),
-          );
-
-          this.addStory(
-            new UserStory({
-              asA: permission.userType,
-              iWant: `See a permission denied message for ${model.name} if I am not owner`,
-              soICan: 'know I dont have access',
-            }),
-          );
-        } else {
-          this.addStory(
-            new UserStory({ asA: permission.userType, iWant: `List all ${model.name}s`, soICan: 'easily navigate' }),
-          );
-          this.addStory(
-            new UserStory({
-              asA: permission.userType,
-              iWant: `See a single ${model.name}`,
-              soICan: 'see more in depth information',
-            }),
-          );
-        }
-
-        this.addStory(
-          new UserStory({
-            asA: permission.userType,
-            iWant: `to be able to link others directly to ${model.name}`,
-            soICan: 'share links on other platforms',
-          }),
-        );
-      });
-
-      const denyReadyUsers = model.cannotRead;
-      denyReadyUsers.forEach((permission) => {
-        this.addStory(new UserStory({ asA: permission.userType, iWant: `to not access ${model.name}`, soICan: '' }));
-      });
-
-      /* -------------------------- Update Users Stories -------------------------- */
-      const updateUsers = model.canUpdate;
-      updateUsers.forEach((permission) => {
-        this.addStory(
-          new UserStory({ asA: permission.userType, iWant: `update ${model.name}s`, soICan: 'change information' }),
-        );
-      });
-
-      const cannotUpdateUsers = model.cannotUpdate;
-      cannotUpdateUsers.forEach((permission) => {
-        this.addStory(
-          new UserStory({ asA: permission.userType, iWant: `to not be able to update ${model.name}s`, soICan: '' }),
-        );
-      });
-
-      /* -------------------------- Delete Users stories -------------------------- */
-      const deleteUsers = model.canDelete;
-      deleteUsers.forEach((permission) => {
-        this.addStory(
-          new UserStory({
-            asA: permission.userType,
-            iWant: `delete ${model.name}s`,
-            soICan: `remove unwanted ${model.name}s`,
-          }),
-        );
-      });
-
-      const cannotDeleteUsers = model.cannotDelete;
-      cannotDeleteUsers.forEach((permission) => {
-        this.addStory(
-          new UserStory({ asA: permission.userType, iWant: `to not be able to delete ${model.name}s`, soICan: '' }),
-        );
-      });
-    });
-
-    return this;
-  };
-
   private generateOutput = (): string => {
     return JSON.stringify(this.stories, null, 2);
   };
@@ -302,6 +154,7 @@ export default class Project {
 
     return csvJson;
   };
+
   create = () => {
     const stories: string[] = [];
     this.stories.forEach((story) => stories.push(story.create()));

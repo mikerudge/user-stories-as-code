@@ -1,6 +1,7 @@
 import UserType from './userType';
 import uniqid from 'uniqid';
 import Permission, { Action } from './permissions';
+import CRUDStories from './CRUDStories';
 
 type ModelProps = {
   name: string;
@@ -9,16 +10,7 @@ type ModelProps = {
 export class Model {
   id: string;
   name: string | undefined;
-
-  canCreate: Set<Permission> = new Set();
-  canRead: Set<Permission> = new Set();
-  canUpdate: Set<Permission> = new Set();
-  canDelete: Set<Permission> = new Set();
-
-  cannotCreate: Set<Permission> = new Set();
-  cannotRead: Set<Permission> = new Set();
-  cannotUpdate: Set<Permission> = new Set();
-  cannotDelete: Set<Permission> = new Set();
+  permissions: Set<Permission> = new Set();
 
   userTypes: Set<UserType>;
 
@@ -39,18 +31,23 @@ export class Model {
    * @memberof Model
    */
   private _addPermissionToModel = (permission: Permission): Model => {
-    const levelObject: { [Key in Action]: (perm: Permission) => Model } = {
-      all: this.fullAccess,
-      deny: this.noAccess,
-      create: this.addCreate,
-      read: this.addRead,
-      update: this.addUpdate,
-      delete: this.addDelete,
-    };
+    const hasPermission = this.permissions.has(permission);
+    if (!hasPermission) {
+      this.permissions.forEach((existingPermission) => {
+        if (existingPermission.userType.id === permission.userType.id) {
+          permission.actions.forEach((action) => {
+            if (existingPermission.actions.has(action)) {
+              throw new Error(`Permission for action ${action} already exists for ${permission.userType.name}`);
+            }
+          });
+        }
+      });
 
-    permission.actions.forEach((action) => {
-      return levelObject[action](permission);
-    });
+      if (permission.userType) {
+        this._addUserTypeToModel(permission.userType);
+      }
+      this.permissions.add(permission);
+    }
 
     return this;
   };
@@ -76,81 +73,33 @@ export class Model {
     return this;
   };
 
-  public readonly addPermission = (permission: Permission): Model => {
-    if (permission) {
+  /**
+   * @description add permission to model
+   * @author Mike Rudge
+   * @date 08/11/2021
+   * @param {(Permission | Permission[])} permission
+   * @memberof Model
+   */
+  public readonly addPermission = (permission: Permission | Permission[]): Model => {
+    if (Array.isArray(permission)) {
+      permission.forEach((perm) => {
+        this._addPermissionToModel(perm);
+      });
+    } else {
       this._addPermissionToModel(permission);
     }
-
     return this;
   };
 
-  readonly addName = (value: string): Model => {
+  /**
+   * @description set the model name
+   * @author Mike Rudge
+   * @date 08/11/2021
+   * @param {string} value
+   * @memberof Model
+   */
+  public readonly addName = (value: string): Model => {
     this.name = value;
-    return this;
-  };
-
-  private addCreate = (permission: Permission): Model => {
-    if (permission.can) {
-      // if permission.userType is already  in the this.canCreate set then remove the only one first,
-      this.canCreate.forEach((perm) => {
-        if (perm.userType === permission.userType) {
-          this.canCreate.delete(perm);
-        }
-      });
-      // then add the new one
-      this.canCreate.add(permission);
-    } else {
-      this.cannotCreate.forEach((perm) => {
-        if (perm.userType === permission.userType) {
-          this.canCreate.delete(perm);
-        }
-      });
-      this.cannotCreate.add(permission);
-    }
-
-    return this;
-  };
-
-  private addUpdate = (permission: Permission): Model => {
-    if (permission.can) {
-      this.canUpdate.add(permission);
-    } else {
-      this.cannotUpdate.add(permission);
-    }
-    return this;
-  };
-
-  private addDelete = (permission: Permission): Model => {
-    if (permission.can) {
-      this.canDelete.add(permission);
-    } else {
-      this.cannotDelete.add(permission);
-    }
-    return this;
-  };
-
-  private addRead = (permission: Permission): Model => {
-    if (permission.can) {
-      this.canRead.add(permission);
-    } else {
-      this.cannotRead.add(permission);
-    }
-    return this;
-  };
-
-  private fullAccess = (permission: Permission): Model => {
-    this.addCreate(permission);
-    this.addUpdate(permission);
-    this.addDelete(permission);
-    this.addRead(permission);
-    return this;
-  };
-
-  private noAccess = (permission: Permission): Model => {
-    this.addCreate(permission);
-    this.addUpdate(permission);
-    this.addDelete(permission);
-    this.addRead(permission);
     return this;
   };
 }

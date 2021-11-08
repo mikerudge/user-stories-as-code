@@ -2,16 +2,20 @@ import uniqid from 'uniqid';
 
 type EpicProps = {
   name: string;
-  description: string;
+  description?: string;
+  color?: string;
 };
 
 export class Epic {
-  description: string;
   id: string;
   name: string;
+  description: string;
+  color: string;
+
   constructor(public params?: EpicProps) {
     this.description = params?.description ?? '';
     this.name = params?.name ?? '';
+    this.color = params?.color ?? '';
     this.id = uniqid();
   }
 
@@ -36,6 +40,12 @@ export class Epic {
    */
   setDescription = (description: string): Epic => {
     this.description = description;
+    return this;
+  };
+
+  setColor = (color: string): Epic => {
+    this.color = color;
+
     return this;
   };
 }
