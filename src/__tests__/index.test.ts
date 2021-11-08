@@ -31,7 +31,7 @@ it('Create a new project', () => {
   const organisation = new Model({ name: 'Organisation' });
   const userModel = new Model({ name: 'User' }).addPermission(new Permission({ userType: admin, actions: ['all'] }));
   const authorModel = new Model({ name: 'Author' })
-    .addPermission(new Permission({ userType: admin, actions: ['read'] }))
+    .addPermission(new Permission({ userType: admin, actions: ['read'], can: false }))
     .addPermission(new Permission({ userType: businessOwner, actions: ['read'], condition: 'owner' }));
   const taskModel = new Model({ name: 'Task' }).addPermission(new Permission({ userType: admin, actions: ['all'] }));
   const bookModel = new Model({ name: 'Book' });

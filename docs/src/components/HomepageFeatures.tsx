@@ -16,38 +16,25 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
+    title: 'Compose user stories using typescript',
     image: '/img/undraw_docusaurus_mountain.svg',
-    description: (
-      <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
-      </>
-    ),
+    description: <>All the advantages of typescript and code to write robust user stories.</>,
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Export to anywhere',
     image: '/img/undraw_docusaurus_tree.svg',
     description: (
-      <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
-      </>
+      <>Export your stories to any format you want, and even use plugins to export directly to Google Sheets and Jira</>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Generate stories',
     image: '/img/undraw_docusaurus_react.svg',
-    description: (
-      <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
-      </>
-    ),
+    description: <>Easily generate stories for all the CRUD operations.</>,
   },
 ];
 
-function Feature({title, image, description}: FeatureItem) {
+function Feature({ title, image, description }: FeatureItem) {
   return (
     <div className={clsx('col col--4')}>
       <div className="text--center">
