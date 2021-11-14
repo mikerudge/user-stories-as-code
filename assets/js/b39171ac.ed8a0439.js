@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[436],{3838:function(a){a.exports=JSON.parse('{"allTagsPath":"/usac/blog/tags","slug":"/usac/blog/tags/facebook","name":"facebook","count":1,"permalink":"/usac/blog/tags/facebook"}')}}]);
