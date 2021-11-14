@@ -9,7 +9,7 @@ const config = {
   title: 'User stories as code',
   tagline: 'Typesafe user stories',
   url: 'https://mikerudge.github.io/',
-  baseUrl: '/usac/',
+  baseUrl: '/user-stories-as-code/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
