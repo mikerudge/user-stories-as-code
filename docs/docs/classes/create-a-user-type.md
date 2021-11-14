@@ -12,13 +12,6 @@ lets create our admin user
 const adminUser = new UserType({ name: 'Admin' });
 ```
 
-## Adding permissions
+## Permissions
 
-For each user type you can add default permissions on each user.
-
-```typescript
-const restrictedUser = new UserType({ name: 'RestrictedUser' }).addPermissions({
-  actions: ['read'],
-  condition: 'owner',
-});
-```
+User types can also have permissions, check the [permission docs](../CRUDStories/create-a-permission).

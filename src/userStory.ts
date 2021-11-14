@@ -1,16 +1,16 @@
 import { Platform } from './platforms';
 import Task from './task';
-import UserType from './userType';
+import UserType, { UserTypeOutput } from './userType';
 import uniqid from 'uniqid';
 import { Epic } from './epic';
 import Department from './department';
 import Sprint from './sprint';
+import TeamMember from './teamMember';
 
 export type UserStoryProps = {
   iWant?: string;
   asA?: UserType;
   soICan?: string;
-  points?: number;
   platform?: Platform;
   dueDate?: Date;
   labels?: string[];
@@ -18,24 +18,40 @@ export type UserStoryProps = {
   epic?: Epic;
   departments?: Department[];
   sprint?: Sprint;
+  points?: number;
+  key?: string;
+  assignee?: TeamMember[];
+  tasks?: Task[];
 };
-// A class that allows users to add new user stories
+export type UserStoryOutput = {
+  id: string;
+  summary: string;
+  tasks?: Task[];
+  asA: string;
+  userType: UserTypeOutput;
+} & Omit<UserStoryProps, 'asA'>;
+
 export default class UserStory {
   readonly id: string;
-  iWant: string;
-  asA: UserType | undefined;
-  soICan: string | undefined;
-  labels: string[] | undefined;
-  dueDate: Date | undefined;
+  public iWant: string;
+  public asA: UserType | undefined;
+  public soICan: string | undefined;
+  public labels: string[] | undefined;
+  public dueDate: Date | undefined;
   public summary: string | undefined;
   public platform: Platform | undefined;
   public description: string | undefined;
-  public tasks: Task[];
+  public tasks: Set<Task>;
   public epic: Epic | undefined;
   public departments: Set<Department>;
   public sprint: Sprint | undefined;
+  public points: number;
+  public key: string;
+  public assignee: Set<TeamMember>;
 
   constructor(public props?: UserStoryProps) {
+    this.id = uniqid();
+    this.points = props?.points ?? 0;
     this.iWant = props?.iWant ?? 'New User Story';
     this.asA = props?.asA;
     this.soICan = props?.soICan ?? '';
@@ -43,13 +59,33 @@ export default class UserStory {
     this.labels = props?.labels;
     this.platform = props?.platform;
     this.dueDate = props?.dueDate;
-    this.tasks = [];
-    this.id = uniqid();
+    this.tasks = new Set(props?.tasks);
     this.epic = props?.epic;
     this.departments = new Set(props?.departments);
     this.summary = this._generateSummary();
     this.sprint = props?.sprint;
+    this.key = props?.key ?? '';
+    this.assignee = new Set(props?.assignee);
   }
+
+  public setKey = (key: string): UserStory => {
+    this.key = key;
+    return this;
+  };
+
+  public setPoints = (points: number): UserStory => {
+    this.points = points;
+    return this;
+  };
+
+  public setAssignee = (assignee: TeamMember | TeamMember[]): UserStory => {
+    if (Array.isArray(assignee)) {
+      assignee.forEach((member) => this?.assignee?.add(member));
+    } else {
+      this.assignee?.add(assignee);
+    }
+    return this;
+  };
 
   public setAsA = (who: UserType): UserStory => {
     this.asA = who;
@@ -93,12 +129,13 @@ export default class UserStory {
    * @param {Task} task
    * @memberof UserStory
    */
-  public addTask = (task: Task): UserStory => {
-    // Check to make sure task is not already added
-    if (!this.tasks.includes(task)) {
-      const taskWithStory = task.setUserStory(this);
-      this.tasks?.push(taskWithStory);
+  public addTask = (task: Task | Task[]): UserStory => {
+    if (Array.isArray(task)) {
+      task.forEach((task) => this.tasks.add(task));
+    } else {
+      this.tasks?.add(task);
     }
+
     return this;
   };
 
@@ -153,7 +190,7 @@ export default class UserStory {
     return this.summary;
   };
 
-  public create = (): string => {
+  public create = (): UserStoryOutput => {
     if (!this.iWant) {
       throw new Error('No user type specified');
     }
@@ -163,13 +200,24 @@ export default class UserStory {
     }
     this._generateSummary();
 
-    const out = {
+    const out: UserStoryOutput = {
       id: this.id.toString(),
-      summary: this.summary?.toString(),
-      userType: this.asA?.name ?? '',
+      key: this.key,
+      summary: this.summary?.toString() ?? '',
+      description: this.description?.toString() ?? '',
+      userType: this.asA.toJSON(),
+      asA: this.asA.name,
+      iWant: this.iWant?.toString(),
+      soICan: this.soICan?.toString(),
+      platform: this.platform,
+      dueDate: this.dueDate,
+      labels: this.labels,
+      sprint: this.sprint,
+      tasks: Array.from(this.tasks) ?? [],
+      points: this.points,
     };
 
-    return JSON.stringify(out);
+    return out;
     // return this.summary;
   };
 }

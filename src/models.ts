@@ -10,14 +10,15 @@ type ModelProps = {
 export class Model {
   id: string;
   name: string | undefined;
-  permissions: Set<Permission> = new Set();
-
+  permissions: Set<Permission>;
   userTypes: Set<UserType>;
 
   constructor(props?: ModelProps) {
     this.id = uniqid();
     this.name = props?.name;
     this.userTypes = new Set();
+
+    this.permissions = new Set();
   }
 
   /**
@@ -36,16 +37,15 @@ export class Model {
       this.permissions.forEach((existingPermission) => {
         if (existingPermission.userType.id === permission.userType.id) {
           permission.actions.forEach((action) => {
-            if (existingPermission.actions.has(action)) {
-              throw new Error(`Permission for action ${action} already exists for ${permission.userType.name}`);
+            if (existingPermission.actions.has(action) && existingPermission.can !== permission.can) {
+              throw new Error(
+                `Permission for action ${action} has the opposite permission for ${permission.userType.name} on model ${this.name}`,
+              );
             }
           });
         }
       });
 
-      if (permission.userType) {
-        this._addUserTypeToModel(permission.userType);
-      }
       this.permissions.add(permission);
     }
 

@@ -16,11 +16,7 @@ it('should output a csv', () => {
     .setSoThat('I can read')
     .addTask(new Task({ name: 'get a book' }));
 
-  const project = new Project({ name: 'test' })
-    .addModel(userModel)
-    .addModel(todoModel)
-    .addStory(story)
-    .generateCrudStories();
+  const project = new Project({ name: 'test' }).addStory(story);
 
   const csvStories = project.outputStories('csv');
 

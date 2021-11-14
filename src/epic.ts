@@ -1,22 +1,30 @@
 import uniqid from 'uniqid';
+import Milestone from './milestone';
 
 type EpicProps = {
   name: string;
   description?: string;
   color?: string;
+  milestone?: Milestone;
 };
+
+export type EpicOutput = {
+  id: string;
+} & EpicProps;
 
 export class Epic {
   id: string;
   name: string;
   description: string;
   color: string;
+  milestone: Milestone | undefined;
 
   constructor(public params?: EpicProps) {
-    this.description = params?.description ?? '';
-    this.name = params?.name ?? '';
-    this.color = params?.color ?? '';
     this.id = uniqid();
+    this.name = params?.name ?? '';
+    this.description = params?.description ?? '';
+    this.color = params?.color ?? '';
+    this.milestone = params?.milestone;
   }
 
   /**
@@ -28,6 +36,11 @@ export class Epic {
    */
   setName = (name: string): Epic => {
     this.name = name;
+    return this;
+  };
+
+  setMilestone = (milestone: Milestone): Epic => {
+    this.milestone = milestone;
     return this;
   };
 
@@ -47,5 +60,23 @@ export class Epic {
     this.color = color;
 
     return this;
+  };
+
+  addMilestone = (milestone: Milestone): Epic => {
+    this.milestone = milestone;
+    return this;
+  };
+
+  toJSON = (): EpicOutput => {
+    return {
+      id: this.id,
+      name: this.name,
+      description: this.description,
+      color: this.color,
+    };
+  };
+
+  output = (): EpicOutput => {
+    return this.toJSON();
   };
 }

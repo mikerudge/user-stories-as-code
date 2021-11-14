@@ -1,16 +1,35 @@
+import uniqid from 'uniqid';
+
 export type PlatformProps = {
-  title: string;
+  name: string;
 };
 
+export type PlatformOut = {
+  id: string;
+} & PlatformProps;
+
 export class Platform {
-  title: string;
+  name: string;
+  id: string;
 
   constructor(props?: PlatformProps) {
-    this.title = props?.title ?? '';
+    this.name = props?.name ?? '';
+    this.id = uniqid();
   }
 
-  setTitle = (title: string): Platform => {
-    this.title = title;
+  setName = (name: string): Platform => {
+    this.name = name;
     return this;
+  };
+
+  toJSON(): PlatformOut {
+    return {
+      id: this.id,
+      name: this.name,
+    };
+  }
+
+  output = (): PlatformOut => {
+    return this.toJSON();
   };
 }

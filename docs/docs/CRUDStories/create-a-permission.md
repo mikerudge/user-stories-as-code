@@ -1,10 +1,12 @@
 ---
-sidebar_position: 4
+sidebar_position: 3
 ---
 
 # Create a Permission
 
-UserTypes can also be given default permissions, for example our admin user type should be able to `create` `read` `update` and `delete` everything in the project so lets add that in.
+A permission is used to give the generator more clues about the user types, and what each user is allowed to do.
+
+UserTypes can be given default permissions, for example our admin user type should be able to `create` `read` `update` and `delete` everything in the project so lets add that in.
 
 ```typescript
 const adminReadPermission = new Permission({ userType: admin, actions: ['read'], can: true });
@@ -33,7 +35,7 @@ new Permission({ userType: admin, actions: ['read'], condition: 'owner' });
 
 ## Add Permission To User Type
 
-Adding permissions to a user type is a default way to set permissions
+Adding permissions to a user type is a default way to set permissions on all models. For example if you want an 'admin' who can do everything on every model.
 
 ```typescript
 adminUser.addPermissions({

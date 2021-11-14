@@ -7,6 +7,8 @@ import Task from '../task';
 import UserStory from '../userStory';
 import UserType from '../userType';
 import CRUDStories from '../CRUDStories';
+import Milestone from '../milestone';
+import TeamMember from '../teamMember';
 
 it('Create a new project', () => {
   // Define the different user types in the project
@@ -17,45 +19,56 @@ it('Create a new project', () => {
   const developers = new Department({ name: 'Developers' });
 
   // Create the different epics for the project
-  const authEpic = new Epic({ name: 'Auth', description: 'Everything to do with auth' });
+  const authEpic = new Epic({ name: 'Auth', description: 'Everything to do with auth' }).addMilestone(
+    new Milestone({ name: 'Complete Auth', startDate: new Date(), endDate: new Date() }),
+  );
 
   // Create a custom story
   const firstUserStory = new UserStory()
     .setAsA(admin)
     .setIWant('to be able to create a new project')
     .setSoThat('I can start working on it')
-    .addTask(new Task({ name: 'Create a new project' }))
-    .addTask(new Task({ name: 'Setup github repo' }))
+    .addTask(new Task({ title: 'Create a new project' }))
+    .addTask(new Task({ title: 'Setup github repo' }))
     .addEpic(authEpic)
     .addDepartment(developers);
 
+  const james = new TeamMember({ name: 'James ' });
+  firstUserStory.setAssignee(james);
+
+  // Models
   const organisation = new Model({ name: 'Organisation' });
   const userModel = new Model({ name: 'User' }).addPermission(new Permission({ userType: admin, actions: ['all'] }));
   const authorModel = new Model({ name: 'Author' })
+    .addUserType(admin)
     .addPermission(new Permission({ userType: admin, actions: ['read'], can: false }))
-    .addPermission(new Permission({ userType: businessOwner, actions: ['read'], condition: 'owner' }));
+    .addPermission(new Permission({ userType: businessOwner, actions: ['read'], belongsTo: 'owner' }));
   const taskModel = new Model({ name: 'Task' }).addPermission(new Permission({ userType: admin, actions: ['all'] }));
   const bookModel = new Model({ name: 'Book' });
+
+  // An example of a task for a project
+  const projectTask = new Task({ title: 'Invite the team to the repo' }).setAssignee(james);
 
   // Create a new project that puts it all together
   const project = new Project({ name: 'Awesome Sauce' })
     .addStory(
       new UserStory({ asA: admin, iWant: 'to be able to code a story', soICan: 'Easily create stories using code' }),
     )
-    .addStory(firstUserStory);
+    .addStory(firstUserStory)
+    .addMilestone(new Milestone({ name: 'First Milestone' }))
+    .addTask(projectTask);
 
-  new CRUDStories(project)
+  const stories = new CRUDStories()
     .addModel(organisation)
-    .addModel(userModel)
-    .addModel(authorModel)
-    .addModel(taskModel)
-    .addModel(bookModel)
+    .addModel([userModel, authorModel, taskModel, bookModel])
     .generate();
 
-  project.create();
+  project.addStories(stories);
+
+  const finished = project.output();
 
   console.log('stories.size', project.stories.size);
-  console.log('project', JSON.stringify(project, null, 2));
+  console.log('project', finished);
 
-  expect(project.name).toBe('Awesome Sauce');
+  expect(finished.name).toBe('Awesome Sauce');
 });

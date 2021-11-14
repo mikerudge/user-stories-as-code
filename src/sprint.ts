@@ -7,7 +7,7 @@ type SprintParams = {
   endDate: Date;
 };
 
-type SprintOut = {
+export type SprintOut = {
   id: string;
 } & SprintParams;
 

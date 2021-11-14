@@ -29,4 +29,18 @@ const story = new UserStory()
   .SoThat('I can start working on it');
 ```
 
+## Tasks
+
+A user story can also have sub tasks. First create a task like so
+
+```typescript
+const task = new Task({ name: 'Create a new project' });
+```
+
+then add it to the story.
+
+```typescript
+story.addTask(task);
+```
+
 Nice, but what is `admin`?

@@ -1,4 +1,4 @@
-# CRUD Example
+# Full Example
 
 Ok I think we have enough information to actually generate stories based on model and permissions. Let look at a full example.
 
@@ -11,40 +11,53 @@ const businessOwner = new UserType({ name: 'Business Owner' });
 const developers = new Department({ name: 'Developers' });
 
 // Create the different epics for the project
-const authEpic = new Epic({ name: 'Auth', description: 'Everything to do with auth' });
+const authEpic = new Epic({ name: 'Auth', description: 'Everything to do with auth' }).addMilestone(
+  new Milestone({ name: 'Complete Auth', startDate: new Date(), endDate: new Date() }),
+);
 
 // Create a custom story
 const firstUserStory = new UserStory()
   .setAsA(admin)
   .setIWant('to be able to create a new project')
   .setSoThat('I can start working on it')
-  .addTask(new Task({ name: 'Create a new project' }))
-  .addTask(new Task({ name: 'Setup github repo' }))
+  .addTask(new Task({ title: 'Create a new project' }))
+  .addTask(new Task({ title: 'Setup github repo' }))
   .addEpic(authEpic)
   .addDepartment(developers);
 
+const james = new TeamMember({ name: 'James ' });
+firstUserStory.setAssignee(james);
+
+// Models
 const organisation = new Model({ name: 'Organisation' });
 const userModel = new Model({ name: 'User' }).addPermission(new Permission({ userType: admin, actions: ['all'] }));
 const authorModel = new Model({ name: 'Author' })
-  .addPermission(new Permission({ userType: admin, actions: ['read'] }))
-  .addPermission(new Permission({ userType: businessOwner, actions: ['read'], condition: 'owner' }));
+  .addUserType(admin)
+  .addPermission(new Permission({ userType: admin, actions: ['read'], can: false }))
+  .addPermission(new Permission({ userType: businessOwner, actions: ['read'], belongsTo: 'owner' }));
 const taskModel = new Model({ name: 'Task' }).addPermission(new Permission({ userType: admin, actions: ['all'] }));
 const bookModel = new Model({ name: 'Book' });
 
+// An example of a task for a project
+const projectTask = new Task({ title: 'Invite the team to the repo' }).setAssignee(james);
+
 // Create a new project that puts it all together
 const project = new Project({ name: 'Awesome Sauce' })
-  // Can also add custom stories in line
   .addStory(
     new UserStory({ asA: admin, iWant: 'to be able to code a story', soICan: 'Easily create stories using code' }),
   )
-  .addModel(organisation)
-  .addModel(userModel)
-  .addModel(authorModel)
-  .addModel(taskModel)
-  .addModel(bookModel)
   .addStory(firstUserStory)
-  .generateCrudStories()
-  .create();
+  .addMilestone(new Milestone({ name: 'First Milestone' }))
+  .addTask(projectTask);
+
+const stories = new CRUDStories()
+  .addModel(organisation)
+  .addModel([userModel, authorModel, taskModel, bookModel])
+  .generate();
+
+project.addStories(stories);
+
+const finished = project.output();
 ```
 
 PHEW quite a bit of code but for all that work, we get an entire project structure that we can use tp automate setting up the project, and generating the user stories, which can then be used to automatically setup docs (Google sheets) and even setup the project in Jira.

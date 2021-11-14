@@ -1,30 +1,31 @@
 import { Model } from './models';
 import Permission from './permissions';
-import Project from './project';
+
 import Task from './task';
 import UserStory from './userStory';
 
 type CRUDStoriesParams = {
-  name: string;
   canFilterList?: boolean;
   canSortList?: boolean;
   canPaginateList?: boolean;
   shouldSoftDelete?: boolean;
+  models?: Model[];
 };
 
-export default class CRUDStories extends Project {
+export default class ProjectWithCRUDStories {
   canFilterList: boolean;
   canSortList: boolean;
   canPaginateList: boolean;
   shouldSoftDelete: boolean;
-  models: Set<Model> = new Set();
+  models: Set<Model>;
+  stories: Set<UserStory> = new Set();
 
   constructor(params?: CRUDStoriesParams) {
-    super(params ?? { name: 'CRUDStories' });
     this.canFilterList = params?.canFilterList ?? true;
     this.canSortList = params?.canSortList ?? true;
     this.canPaginateList = params?.canPaginateList ?? true;
     this.shouldSoftDelete = params?.shouldSoftDelete ?? false;
+    this.models = new Set(params?.models ?? []);
   }
 
   /**
@@ -34,8 +35,12 @@ export default class CRUDStories extends Project {
    * @param {Model} model
    * @memberof Project
    */
-  addModel = (model: Model): CRUDStories => {
-    this.models.add(model);
+  addModel = (model: Model | Model[]): ProjectWithCRUDStories => {
+    if (Array.isArray(model)) {
+      model.forEach((m) => this.models.add(m));
+    } else {
+      this.models.add(model);
+    }
     return this;
   };
 
@@ -46,8 +51,13 @@ export default class CRUDStories extends Project {
    * @param {Model[]} models
    * @memberof Project
    */
-  addManyModels = (models: Model[]): CRUDStories => {
+  addManyModels = (models: Model[]): ProjectWithCRUDStories => {
     models.forEach((model) => this.addModel(model));
+    return this;
+  };
+
+  private readonly _addStory = (story: UserStory): ProjectWithCRUDStories => {
+    this.stories.add(story);
     return this;
   };
 
@@ -60,33 +70,47 @@ export default class CRUDStories extends Project {
    * @param {Model} model
    * @memberof GenerateCRUDStories
    */
-  private readonly _createCreateUserStories = (permission: Permission, model: Model): CRUDStories => {
+  private readonly _createCreateUserStories = (permission: Permission, model: Model): ProjectWithCRUDStories => {
     if (permission.actions.has('create')) {
       /* -------------------------- Create Users stories -------------------------- */
 
       if (permission.can) {
-        const story = new UserStory({
-          asA: permission.userType,
-          iWant: `Create ${model.name}s`,
-          soICan: 'create a new record',
-        });
-        this.addStory(story);
+        if (typeof permission.belongsTo !== 'string' && permission.belongsTo?.name) {
+          const modelName = permission.belongsTo?.name;
 
-        if (this.departments.size > 0) {
-          this.departments.forEach((department) => {
-            const createTask = new Task({ name: `${department.name} to work on create for ${model.name}s` });
-            story.addTask(createTask);
+          const story = new UserStory({
+            asA: permission.userType,
+            iWant: `create ${model.name}s on ${modelName}s that I can access`,
+            soICan: 'create a new record',
           });
+          this._addStory(story);
+        } else {
+          const story = new UserStory({
+            asA: permission.userType,
+            iWant: `Create ${model.name}s`,
+            soICan: 'create a new record',
+          });
+          this._addStory(story);
         }
       }
 
       if (!permission.can) {
-        const story = new UserStory({
-          asA: permission.userType,
-          iWant: `to be denied access to creating ${model.name}`,
-          soICan: '',
-        });
-        this.addStory(story);
+        if (typeof permission.belongsTo !== 'string' && permission.belongsTo?.name) {
+          const modelName = permission.belongsTo?.name;
+
+          const story = new UserStory({
+            asA: permission.userType,
+            iWant: `to be blocked from creating ${model.name}s on ${modelName}`,
+          });
+          this._addStory(story);
+        } else {
+          const story = new UserStory({
+            asA: permission.userType,
+            iWant: `to be denied access to creating ${model.name}`,
+            soICan: '',
+          });
+          this._addStory(story);
+        }
       }
     }
     return this;
@@ -101,11 +125,26 @@ export default class CRUDStories extends Project {
    * @param {Model} model
    * @memberof CRUDStories
    */
-  private readonly _createReadStories = (permission: Permission, model: Model): CRUDStories => {
+  private readonly _createReadStories = (permission: Permission, model: Model): ProjectWithCRUDStories => {
     if (permission.can) {
-      if (permission.condition === 'owner') {
-        const ownerTask = new Task({ name: `Reject requests for ${model.name} if the user is not the owner` });
-        this.addStory(
+      if (typeof permission.belongsTo !== 'string') {
+        // Belongs to a  model.
+        const modelName = permission.belongsTo?.name;
+        const belongToTask = new Task({
+          title: `Reject requests for ${model.name} if the user is not part of ${modelName}`,
+        });
+
+        this._addStory(
+          new UserStory({
+            asA: permission.userType,
+            iWant: `to only access ${model.name}s that are in my ${modelName}`,
+          }).addTask(belongToTask),
+        );
+      }
+
+      if (permission.belongsTo === 'owner') {
+        const ownerTask = new Task({ title: `Reject requests for ${model.name} if the user is not the owner` });
+        this._addStory(
           new UserStory({
             asA: permission.userType,
             iWant: `to be able to view ${model.name}s that belong to me`,
@@ -113,7 +152,7 @@ export default class CRUDStories extends Project {
           }).addTask(ownerTask),
         );
 
-        this.addStory(
+        this._addStory(
           new UserStory({
             asA: permission.userType,
             iWant: `See a single ${model.name} if I am the owner`,
@@ -121,7 +160,7 @@ export default class CRUDStories extends Project {
           }),
         );
 
-        this.addStory(
+        this._addStory(
           new UserStory({
             asA: permission.userType,
             iWant: `See a permission denied message for ${model.name} if I am not owner`,
@@ -129,12 +168,12 @@ export default class CRUDStories extends Project {
           }),
         );
       } else {
-        this.addStory(
+        this._addStory(
           new UserStory({ asA: permission.userType, iWant: `List all ${model.name}s`, soICan: 'easily navigate' }),
         );
 
         if (this.canFilterList) {
-          this.addStory(
+          this._addStory(
             new UserStory({
               asA: permission.userType,
               iWant: `to be able to filter ${model.name}s`,
@@ -144,7 +183,7 @@ export default class CRUDStories extends Project {
         }
 
         if (this.canSortList) {
-          this.addStory(
+          this._addStory(
             new UserStory({
               asA: permission.userType,
               iWant: `to be able to sort ${model.name}s`,
@@ -154,7 +193,7 @@ export default class CRUDStories extends Project {
         }
 
         if (this.canPaginateList) {
-          this.addStory(
+          this._addStory(
             new UserStory({
               asA: permission.userType,
               iWant: `to be able to paginate ${model.name}s`,
@@ -163,7 +202,7 @@ export default class CRUDStories extends Project {
           );
         }
 
-        this.addStory(
+        this._addStory(
           new UserStory({
             asA: permission.userType,
             iWant: `See a single ${model.name?.toLocaleLowerCase()}`,
@@ -172,7 +211,7 @@ export default class CRUDStories extends Project {
         );
       }
     } else if (!permission.can) {
-      this.addStory(
+      this._addStory(
         new UserStory({
           asA: permission.userType,
           iWant: `only see ${model}s that I have access to`,
@@ -193,16 +232,16 @@ export default class CRUDStories extends Project {
    * @param {Model} model
    * @memberof CRUDStories
    */
-  private readonly _createUpdateStories = (permission: Permission, model: Model): CRUDStories => {
+  private readonly _createUpdateStories = (permission: Permission, model: Model): ProjectWithCRUDStories => {
     if (permission.actions.has('update')) {
       if (permission.can) {
-        this.addStory(
+        this._addStory(
           new UserStory({ asA: permission.userType, iWant: `update ${model.name}s`, soICan: 'change information' }),
         );
       }
 
       if (!permission.can) {
-        this.addStory(
+        this._addStory(
           new UserStory({ asA: permission.userType, iWant: `to not be able to update ${model.name}s`, soICan: '' }),
         );
       }
@@ -219,21 +258,39 @@ export default class CRUDStories extends Project {
    * @param {Model} model
    * @memberof CRUDStories
    */
-  private readonly _createDeleteStories = (permission: Permission, model: Model): CRUDStories => {
+  private readonly _createDeleteStories = (permission: Permission, model: Model): ProjectWithCRUDStories => {
     if (permission.can) {
-      const story = new UserStory({
-        asA: permission.userType,
-        iWant: `soft delete ${model.name}s`,
-        soICan: `remove unwanted ${model.name}s`,
-      });
+      if (permission.belongsTo === 'owner') {
+        this._addStory(
+          new UserStory({
+            asA: permission.userType,
+            iWant: `to be able to delete ${model.name}s that belong to me`,
+            soICan: 'delete records',
+          }),
+        );
+      } else if (typeof permission.belongsTo !== 'string') {
+        const modelName = permission.belongsTo?.name;
+        const story = new UserStory({
+          asA: permission.userType,
+          iWant: `to delete ${model.name}s that are belong to my ${modelName}`,
+          soICan: `remove unwanted ${model.name}s`,
+        });
+        this._addStory(story);
+      } else {
+        const story = new UserStory({
+          asA: permission.userType,
+          iWant: `to delete ${model.name}s`,
+          soICan: `remove unwanted ${model.name}s`,
+        });
 
-      if (this.shouldSoftDelete) {
-        story.setIWant(`to be able to soft delete ${model.name}s`);
+        if (this.shouldSoftDelete) {
+          story.setIWant(`to be able to soft delete ${model.name}s`);
+        }
+
+        this._addStory(story);
       }
-
-      this.addStory(story);
     } else if (!permission.can) {
-      this.addStory(
+      this._addStory(
         new UserStory({ asA: permission.userType, iWant: `to not be able to delete ${model.name}s`, soICan: '' }),
       );
     }
@@ -250,8 +307,8 @@ export default class CRUDStories extends Project {
    * @param {Model} model
    * @memberof CRUDStories
    */
-  private readonly _createModelStories = (permission: Permission, model: Model): CRUDStories => {
-    this.addStory(
+  private readonly _createModelStories = (permission: Permission, model: Model): ProjectWithCRUDStories => {
+    this._addStory(
       new UserStory({
         asA: permission.userType,
         iWant: `to be able to link others directly to ${model.name}`,
@@ -261,7 +318,11 @@ export default class CRUDStories extends Project {
     return this;
   };
 
-  generate(): CRUDStories {
+  generate = (): UserStory[] => {
+    if (this.models.size === 0) {
+      throw new Error('You need to provide at least one model to generate stories');
+    }
+
     this.models.forEach((model) => {
       model.permissions.forEach((permission) => {
         if (permission.actions.has('all')) {
@@ -289,6 +350,6 @@ export default class CRUDStories extends Project {
       });
     });
 
-    return this;
-  }
+    return Array.from(this.stories);
+  };
 }

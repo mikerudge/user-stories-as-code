@@ -1,11 +1,19 @@
+import uniqid from 'uniqid';
+
 type DepartmentProps = {
   name: string;
 };
 
+export type DepartmentOut = {
+  id: string;
+} & DepartmentProps;
+
 export default class Department {
   name: string;
+  id: string;
   constructor(props: DepartmentProps) {
     this.name = props.name;
+    this.id = uniqid();
   }
 
   getName = (): string => {
@@ -17,7 +25,14 @@ export default class Department {
     return this;
   };
 
-  create = (): string => {
-    return this.name;
+  toJSON(): DepartmentOut {
+    return {
+      id: this.id,
+      name: this.name,
+    };
+  }
+
+  output = (): DepartmentOut => {
+    return this.toJSON();
   };
 }
