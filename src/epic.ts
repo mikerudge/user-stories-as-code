@@ -1,8 +1,8 @@
 import uniqid from 'uniqid';
-import Milestone from './milestone';
+import Milestone, { MilestoneOutput } from './milestone';
 
 type EpicProps = {
-  name: string;
+  name?: string;
   description?: string;
   color?: string;
   milestone?: Milestone;
@@ -10,7 +10,8 @@ type EpicProps = {
 
 export type EpicOutput = {
   id: string;
-} & EpicProps;
+  milestone: MilestoneOutput | undefined;
+} & Omit<EpicProps, 'milestone'>;
 
 export class Epic {
   id: string;
@@ -73,6 +74,7 @@ export class Epic {
       name: this.name,
       description: this.description,
       color: this.color,
+      milestone: this.milestone?.output(),
     };
   };
 

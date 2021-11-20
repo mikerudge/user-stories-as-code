@@ -18,11 +18,11 @@ export default class Milestone {
   name: string | undefined;
   startDate: Date | undefined;
   endDate: Date | undefined;
-  constructor(params: MilestoneParams) {
+  constructor(params?: MilestoneParams) {
     this.id = uniqid();
-    this.name = params.name;
-    this.startDate = params.startDate;
-    this.endDate = params.endDate;
+    this.name = params?.name;
+    this.startDate = params?.startDate;
+    this.endDate = params?.endDate;
   }
 
   setName = (name: string): Milestone => {

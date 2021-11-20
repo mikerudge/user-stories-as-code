@@ -1,6 +1,6 @@
 import Department from './department';
 import uniqid from 'uniqid';
-import Permission, { PermissionOutput, PermissionProps } from './permissions';
+import Permission, { PermissionOutput, PermissionProps } from './permission';
 
 export type UserTypeProps = {
   name: string;
@@ -18,10 +18,10 @@ export default class UserType {
   id: string;
   permissions: Permission | undefined;
 
-  constructor(props: UserTypeProps) {
-    this.name = props.name;
+  constructor(props?: UserTypeProps) {
+    this.name = props?.name ?? '';
     this.id = uniqid();
-    this.permissions = props.permissions;
+    this.permissions = props?.permissions;
   }
 
   setName = (name: string): UserType => {
@@ -41,8 +41,8 @@ export default class UserType {
     return this.toJSON();
   };
 
-  addPermissions = (permission: Omit<PermissionProps, 'userType'>): UserType => {
-    this.permissions = new Permission({ ...permission, userType: this });
+  addPermissions = (permission: Omit<Permission, 'userType'>): UserType => {
+    this.permissions = permission.setUserType(this);
 
     return this;
   };

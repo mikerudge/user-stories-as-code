@@ -1,8 +1,8 @@
 import Department from '../department';
 import { Epic } from '../epic';
 import Project from '../index';
-import { Model } from '../models';
-import Permission from '../permissions';
+import { Model } from '../model';
+import Permission from '../permission';
 import Task from '../task';
 import UserStory from '../userStory';
 import UserType from '../userType';
@@ -30,7 +30,7 @@ it('Create a new project', () => {
     .setSoThat('I can start working on it')
     .addTask(new Task({ title: 'Create a new project' }))
     .addTask(new Task({ title: 'Setup github repo' }))
-    .addEpic(authEpic)
+    .setEpic(authEpic)
     .addDepartment(developers);
 
   const james = new TeamMember({ name: 'James ' });
@@ -40,7 +40,6 @@ it('Create a new project', () => {
   const organisation = new Model({ name: 'Organisation' });
   const userModel = new Model({ name: 'User' }).addPermission(new Permission({ userType: admin, actions: ['all'] }));
   const authorModel = new Model({ name: 'Author' })
-    .addUserType(admin)
     .addPermission(new Permission({ userType: admin, actions: ['read'], can: false }))
     .addPermission(new Permission({ userType: businessOwner, actions: ['read'], belongsTo: 'owner' }));
   const taskModel = new Model({ name: 'Task' }).addPermission(new Permission({ userType: admin, actions: ['all'] }));
@@ -66,9 +65,6 @@ it('Create a new project', () => {
   project.addStories(stories);
 
   const finished = project.output();
-
-  console.log('stories.size', project.stories.size);
-  console.log('project', finished);
 
   expect(finished.name).toBe('Awesome Sauce');
 });

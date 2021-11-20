@@ -1,5 +1,5 @@
-import { Model } from './models';
-import Permission from './permissions';
+import { Model } from './model';
+import Permission from './permission';
 
 import Task from './task';
 import UserStory from './userStory';
@@ -28,6 +28,17 @@ export default class ProjectWithCRUDStories {
     this.models = new Set(params?.models ?? []);
   }
 
+  private _addModel(model: Model) {
+    // If there is no userType on model.permissions throw an error
+    model.permissions.forEach((permission) => {
+      if (!permission.userType) {
+        throw new Error(`Permission for model ${model.name} has no userType`);
+      }
+    });
+
+    this.models.add(model);
+  }
+
   /**
    * @description Add model to the project
    * @author Mike Rudge
@@ -37,22 +48,10 @@ export default class ProjectWithCRUDStories {
    */
   addModel = (model: Model | Model[]): ProjectWithCRUDStories => {
     if (Array.isArray(model)) {
-      model.forEach((m) => this.models.add(m));
+      model.forEach((m) => this._addModel(m));
     } else {
-      this.models.add(model);
+      this._addModel(model);
     }
-    return this;
-  };
-
-  /**
-   * @description
-   * @author Mike Rudge
-   * @date 06/11/2021
-   * @param {Model[]} models
-   * @memberof Project
-   */
-  addManyModels = (models: Model[]): ProjectWithCRUDStories => {
-    models.forEach((model) => this.addModel(model));
     return this;
   };
 

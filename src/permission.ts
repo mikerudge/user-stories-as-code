@@ -1,38 +1,47 @@
 import uniqid from 'uniqid';
-import { Model } from './models';
-import UserType from './userType';
+import { Model, ModelOutput } from './model';
+import UserType, { UserTypeOutput } from './userType';
 
 export type Action = 'create' | 'read' | 'update' | 'delete' | 'all' | 'deny';
 
 export type PermissionProps = {
   actions?: Action[];
   belongsTo?: 'owner' | Model | null | undefined;
-  userType: UserType;
+  userType?: UserType | undefined;
   can?: boolean;
 };
 
 export type PermissionOutput = {
   id: string;
-} & PermissionProps;
+  userType?: UserTypeOutput;
+  belongsTo?: ModelOutput | null | undefined | 'owner';
+  can: boolean;
+  actions?: Action[];
+};
 export default class Permission {
   public readonly id: string;
-  public userType: UserType;
+  public userType: UserType | undefined;
   public belongsTo: 'owner' | Model | null | undefined;
   public actions: Set<Action>;
   public can: boolean;
-  constructor(props: PermissionProps) {
+  constructor(props?: PermissionProps) {
     this.id = uniqid();
-    this.userType = props.userType;
-    this.belongsTo = props.belongsTo;
-    this.actions = new Set(props.actions);
-    this.can = props.can ?? true;
+    this.userType = props?.userType;
+    this.belongsTo = props?.belongsTo;
+    this.actions = new Set();
+    this.can = props?.can ?? true;
+    if (props?.actions) {
+      this.setActions(props.actions);
+    }
   }
 
   toJSON(): PermissionOutput {
+    const belongsTo = this.belongsTo === 'owner' ? 'owner' : this.belongsTo?.output();
+
     return {
       id: this.id,
-      userType: this.userType,
-      belongsTo: this.belongsTo,
+      userType: this.userType?.output(),
+      belongsTo: belongsTo,
       actions: Array.from(this.actions),
       can: this.can,
     };
@@ -53,7 +62,7 @@ export default class Permission {
     return this;
   };
 
-  setBelongsTo = (belongsTo: null | 'owner' | undefined): Permission => {
+  setBelongsTo = (belongsTo: null | 'owner' | undefined | Model): Permission => {
     this.belongsTo = belongsTo;
     return this;
   };
@@ -63,11 +72,23 @@ export default class Permission {
     return this;
   };
 
+  private readonly _setAction = (action: Action): Permission => {
+    if (action === 'all') {
+      this.actions.add('create');
+      this.actions.add('read');
+      this.actions.add('update');
+      this.actions.add('delete');
+    } else {
+      this.actions.add(action);
+    }
+    return this;
+  };
+
   readonly setActions = (actions: Action | Action[] | null): Permission => {
     if (Array.isArray(actions)) {
-      actions.forEach((action) => this.actions.add(action));
+      actions.forEach((action) => this._setAction(action));
     } else if (typeof actions === 'string') {
-      this.actions.add(actions);
+      this._setAction(actions);
     }
     return this;
   };

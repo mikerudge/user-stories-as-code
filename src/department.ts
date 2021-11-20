@@ -9,30 +9,31 @@ export type DepartmentOut = {
 } & DepartmentProps;
 
 export default class Department {
-  name: string;
-  id: string;
-  constructor(props: DepartmentProps) {
-    this.name = props.name;
+  public id: string;
+  public name: string;
+
+  constructor(props?: DepartmentProps) {
+    this.name = props?.name ?? '';
     this.id = uniqid();
   }
 
-  getName = (): string => {
+  public getName = (): string => {
     return this.name;
   };
 
-  setName = (name: string): Department => {
+  public output = (): DepartmentOut => {
+    return this.toJSON();
+  };
+
+  public setName = (name: string): Department => {
     this.name = name;
     return this;
   };
 
-  toJSON(): DepartmentOut {
+  public toJSON(): DepartmentOut {
     return {
       id: this.id,
       name: this.name,
     };
   }
-
-  output = (): DepartmentOut => {
-    return this.toJSON();
-  };
 }

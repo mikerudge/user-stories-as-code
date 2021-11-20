@@ -1,5 +1,5 @@
 import uniqid from 'uniqid';
-import TeamMember from './teamMember';
+import TeamMember, { TeamMemberOutput } from './teamMember';
 import UserStory from './userStory';
 
 export type TaskProps = {
@@ -9,6 +9,11 @@ export type TaskProps = {
   status?: string;
   assignee?: TeamMember[];
 };
+
+export type TaskOut = {
+  id: string;
+  assignee?: TeamMemberOutput[];
+} & Omit<TaskProps, 'assignee'>;
 
 export default class Task {
   id: string;
@@ -65,7 +70,14 @@ export default class Task {
     return this;
   };
 
-  create = () => {
-    return { id: this.id, title: this.title };
+  output = (): TaskOut => {
+    return {
+      id: this.id,
+      title: this.title,
+      description: this.description,
+      priority: this.priority,
+      status: this.status,
+      assignee: Array.from(this.assignee).map((member) => member.output()),
+    };
   };
 }

@@ -1,9 +1,9 @@
-import { Platform } from './platforms';
-import Task from './task';
+import { Platform, PlatformOut } from './platforms';
+import Task, { TaskOut } from './task';
 import UserType, { UserTypeOutput } from './userType';
 import uniqid from 'uniqid';
 import { Epic } from './epic';
-import Department from './department';
+import Department, { DepartmentOut } from './department';
 import Sprint from './sprint';
 import TeamMember from './teamMember';
 
@@ -26,17 +26,19 @@ export type UserStoryProps = {
 export type UserStoryOutput = {
   id: string;
   summary: string;
-  tasks?: Task[];
+  tasks?: TaskOut[];
+  platform?: PlatformOut;
   asA: string;
-  userType: UserTypeOutput;
-} & Omit<UserStoryProps, 'asA'>;
+  departments?: DepartmentOut[];
+  userType: UserTypeOutput | undefined;
+} & Omit<UserStoryProps, 'asA' | 'tasks' | 'platform' | 'departments'>;
 
 export default class UserStory {
   readonly id: string;
   public iWant: string;
   public asA: UserType | undefined;
   public soICan: string | undefined;
-  public labels: string[] | undefined;
+  public labels: Set<string> | undefined;
   public dueDate: Date | undefined;
   public summary: string | undefined;
   public platform: Platform | undefined;
@@ -56,7 +58,7 @@ export default class UserStory {
     this.asA = props?.asA;
     this.soICan = props?.soICan ?? '';
     this.description = props?.description;
-    this.labels = props?.labels;
+    this.labels = new Set(props?.labels);
     this.platform = props?.platform;
     this.dueDate = props?.dueDate;
     this.tasks = new Set(props?.tasks);
@@ -68,17 +70,31 @@ export default class UserStory {
     this.assignee = new Set(props?.assignee);
   }
 
-  public setKey = (key: string): UserStory => {
+  public readonly addLabel = (label: string | string[]): UserStory => {
+    if (typeof label === 'string') {
+      this.labels?.add(label);
+    } else {
+      label.forEach((l) => this.labels?.add(l));
+    }
+    return this;
+  };
+
+  public readonly setDueDate = (date: Date): UserStory => {
+    this.dueDate = date;
+    return this;
+  };
+
+  public readonly setKey = (key: string): UserStory => {
     this.key = key;
     return this;
   };
 
-  public setPoints = (points: number): UserStory => {
+  public readonly setPoints = (points: number): UserStory => {
     this.points = points;
     return this;
   };
 
-  public setAssignee = (assignee: TeamMember | TeamMember[]): UserStory => {
+  public readonly addAssignee = (assignee: TeamMember | TeamMember[]): UserStory => {
     if (Array.isArray(assignee)) {
       assignee.forEach((member) => this?.assignee?.add(member));
     } else {
@@ -87,7 +103,7 @@ export default class UserStory {
     return this;
   };
 
-  public setAsA = (who: UserType): UserStory => {
+  public readonly setAsA = (who: UserType): UserStory => {
     this.asA = who;
     this._generateSummary();
     return this;
@@ -100,14 +116,14 @@ export default class UserStory {
     return this;
   };
 
-  public setSoThat = (why: string): UserStory => {
+  public readonly setSoICan = (why: string): UserStory => {
     this.soICan = why;
     this._generateSummary();
 
     return this;
   };
 
-  public setPlatform = (platform: Platform): UserStory => {
+  public readonly setPlatform = (platform: Platform): UserStory => {
     this.platform = platform;
     return this;
   };
@@ -117,7 +133,7 @@ export default class UserStory {
     return this;
   };
 
-  addEpic = (epic: Epic): UserStory => {
+  public readonly setEpic = (epic: Epic): UserStory => {
     this.epic = epic;
     return this;
   };
@@ -129,7 +145,7 @@ export default class UserStory {
    * @param {Task} task
    * @memberof UserStory
    */
-  public addTask = (task: Task | Task[]): UserStory => {
+  public readonly addTask = (task: Task | Task[]): UserStory => {
     if (Array.isArray(task)) {
       task.forEach((task) => this.tasks.add(task));
     } else {
@@ -139,39 +155,22 @@ export default class UserStory {
     return this;
   };
 
-  /**
-   * @description
-   * @author Mike Rudge
-   * @date 06/11/2021
-   * @param {Task[]} tasks
-   * @memberof UserStory
-   */
-  public addManyTasks = (tasks: Task[]): UserStory => {
-    tasks.forEach((task) => {
-      this.addTask(task);
-    });
-    return this;
-  };
+  public readonly addDepartment = (department: Department | Department[]): UserStory => {
+    if (Array.isArray(department)) {
+      department.forEach((d) => this.departments.add(d));
+    } else {
+      this.departments.add(department);
+    }
 
-  public addDepartment = (department: Department): UserStory => {
-    this.departments.add(department);
-
-    return this;
-  };
-
-  public addManyDepartments = (departments: Department[]): UserStory => {
-    departments.forEach((department) => {
-      this.addDepartment(department);
-    });
     return this;
   };
 
   // Capitalise the first letter of a string
-  private _capitalise = (input: string): string => {
+  private readonly _capitalise = (input: string): string => {
     return input.charAt(0).toUpperCase() + input.slice(1);
   };
 
-  private _generateSummary = (): string => {
+  private readonly _generateSummary = (): string => {
     this.summary = '';
 
     if (this.asA?.name) {
@@ -179,7 +178,7 @@ export default class UserStory {
     }
 
     if (this.iWant) {
-      this.summary += `, I want to ${this.iWant}`;
+      this.summary += `, I want ${this.iWant}`;
     }
 
     if (this.soICan) {
@@ -190,14 +189,7 @@ export default class UserStory {
     return this.summary;
   };
 
-  public create = (): UserStoryOutput => {
-    if (!this.iWant) {
-      throw new Error('No user type specified');
-    }
-
-    if (!this.asA) {
-      throw new Error('No what specified');
-    }
+  public readonly toJSON = (): UserStoryOutput => {
     this._generateSummary();
 
     const out: UserStoryOutput = {
@@ -205,19 +197,33 @@ export default class UserStory {
       key: this.key,
       summary: this.summary?.toString() ?? '',
       description: this.description?.toString() ?? '',
-      userType: this.asA.toJSON(),
-      asA: this.asA.name,
+      userType: this.asA?.output(),
+      asA: this.asA?.name ?? '',
       iWant: this.iWant?.toString(),
       soICan: this.soICan?.toString(),
-      platform: this.platform,
+      platform: this.platform?.output(),
       dueDate: this.dueDate,
-      labels: this.labels,
       sprint: this.sprint,
-      tasks: Array.from(this.tasks) ?? [],
       points: this.points,
+      labels: Array.from(this.labels ?? ['']),
+      tasks: Array.from(this.tasks).map((task) => task.output()) ?? [],
+      departments: Array.from(this.departments).map((department) => department.output()) ?? [],
     };
 
     return out;
+  };
+
+  public readonly output = (): UserStoryOutput => {
+    if (!this.iWant) {
+      throw new Error('No user type specified');
+    }
+
+    if (!this.asA) {
+      throw new Error('No what specified');
+    }
+
+    return this.toJSON();
+
     // return this.summary;
   };
 }

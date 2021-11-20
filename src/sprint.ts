@@ -12,16 +12,16 @@ export type SprintOut = {
 } & SprintParams;
 
 export default class Sprint {
-  private id: string;
-  private name: string;
-  private startDate: Date;
-  private endDate: Date;
+  public id: string;
+  public name: string;
+  public startDate: Date;
+  public endDate: Date;
 
-  constructor(params: SprintParams) {
+  constructor(params?: SprintParams) {
     this.id = uniqid();
-    this.name = params.name;
-    this.startDate = params.startDate;
-    this.endDate = params.endDate;
+    this.name = params?.name ?? '';
+    this.startDate = params?.startDate ?? new Date();
+    this.endDate = params?.endDate ?? new Date();
   }
 
   getId(): string {

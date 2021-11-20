@@ -4,6 +4,7 @@ import uniqid from 'uniqid';
 import Department, { DepartmentOut } from './department';
 import { Epic, EpicOutput } from './epic';
 import Milestone, { MilestoneOutput } from './milestone';
+import { Model, ModelOutput } from './model';
 import { Platform, PlatformOut } from './platforms';
 import Sprint, { SprintOut } from './sprint';
 import Task from './task';
@@ -18,18 +19,24 @@ export type ProjectProps = {
   name: string;
   key?: string;
   userTypes?: UserType[];
-  owners?: TeamMember[];
+  owner?: TeamMember;
   stories?: UserStory[];
+  models?: Model[];
+  sprints?: Sprint[];
+  epics?: Epic[];
+  departments?: Department[];
   milestones?: Milestone[];
   teamMembers?: TeamMember[];
   tasks?: Task[];
   options?: ProjectOptions;
+  platforms?: Platform[];
 };
 
 export type ProjectOutput = {
   id: string;
   name: string;
   key: string;
+  models: ModelOutput[];
   milestones: MilestoneOutput[];
   userTypes: UserTypeOutput[];
   stories: UserStoryOutput[];
@@ -49,20 +56,21 @@ export type ProjectOutput = {
 };
 
 export default class Project {
-  readonly id: string;
-  readonly name: string = '';
+  public readonly id: string;
+  public readonly name: string = '';
+  public owner: TeamMember | undefined;
+  public platforms: Set<Platform> = new Set();
+  public sprints: Set<Sprint> = new Set();
+  public stories: Set<UserStory>;
+  public tasks: Set<Task>;
   public teamMembers: Set<TeamMember>;
-  public owners: Set<TeamMember>;
+  public userTypes: Set<UserType> = new Set();
+  public models: Set<Model>;
+  public defaultPoints: number;
+  public departments: Set<Department> = new Set();
+  public epics: Set<Epic> = new Set();
   public key: string;
-  userTypes: Set<UserType> = new Set();
-  stories: Set<UserStory>;
-  departments: Set<Department> = new Set();
-  platforms: Set<Platform> = new Set();
-  epics: Set<Epic> = new Set();
-  sprints: Set<Sprint> = new Set();
-  milestones: Set<Milestone>;
-  tasks: Set<Task>;
-  defaultPoints: number;
+  public milestones: Set<Milestone>;
 
   constructor(props: ProjectProps, options: ProjectOptions = {}) {
     this.id = uniqid();
@@ -72,53 +80,31 @@ export default class Project {
     this.milestones = new Set(props.milestones);
     this.key = props.key || props.name.slice(0, 3).toUpperCase();
     this.teamMembers = new Set(props.teamMembers);
-    this.owners = new Set(props.owners);
+    this.owner = props.owner;
     this.tasks = new Set(props.tasks);
     this.defaultPoints = options.defaultPoints || 0;
+    this.departments = new Set(props.departments);
+    this.platforms = new Set(props.platforms);
+    this.sprints = new Set(props.sprints);
+    this.epics = new Set(props.epics);
+    this.models = new Set(props.models);
   }
 
-  public readonly addTask = (tasks: Task | Task[]): Project => {
-    if (Array.isArray(tasks)) {
-      tasks.forEach((task) => {
-        this.tasks.add(task);
-      });
+  public readonly addModel = (model: Model | Model[]): Project => {
+    if (Array.isArray(model)) {
+      model.forEach((m) => this.models.add(m));
     } else {
-      this.tasks.add(tasks);
-    }
-
-    return this;
-  };
-
-  public readonly addKey = (key: string): Project => {
-    this.key = key;
-    return this;
-  };
-
-  public readonly addOwner = (owner: TeamMember | TeamMember[]): Project => {
-    if (Array.isArray(owner)) {
-      owner.forEach((o) => this.owners.add(o));
-    } else {
-      this.owners.add(owner);
+      this.models.add(model);
     }
     return this;
   };
 
-  public readonly addTeamMember = (teamMember: TeamMember | TeamMember[]): Project => {
-    if (Array.isArray(teamMember)) {
-      teamMember.forEach((member) => this.teamMembers.add(member));
-    } else {
-      this.teamMembers.add(teamMember);
-    }
-    return this;
-  };
+  private _addEpicToProject = (epic: Epic) => {
+    this.epics.add(epic);
 
-  public readonly addMilestone = (milestone: Milestone | Milestone[]): Project => {
-    if (Array.isArray(milestone)) {
-      milestone.forEach((m) => this.milestones.add(m));
-    } else {
-      this.milestones.add(milestone);
+    if (epic.milestone) {
+      this.milestones.add(epic.milestone);
     }
-    return this;
   };
 
   private _addStoryToProject = (story: UserStory) => {
@@ -148,49 +134,64 @@ export default class Project {
     if (story.assignee.size > 0) {
       story.assignee.forEach((member) => this.addTeamMember(member));
     }
-  };
 
-  private _addEpicToProject = (epic: Epic) => {
-    this.epics.add(epic);
-
-    if (epic.milestone) {
-      this.milestones.add(epic.milestone);
+    if (story.asA) {
+      this.addUserType(story.asA);
     }
   };
 
-  addEpic = (epic: Epic | Epic[]): Project => {
-    if (Array.isArray(epic)) {
-      epic.forEach((e) => this._addEpicToProject(e));
+  private generateOutput = (): string => {
+    return JSON.stringify(this.stories, null, 2);
+  };
+
+  public readonly addSprint = (sprint: Sprint | Sprint[]): Project => {
+    if (Array.isArray(sprint)) {
+      sprint.forEach((s) => this.addSprint(s));
     } else {
-      this._addEpicToProject(epic);
+      this.sprints.add(sprint);
     }
+
     return this;
   };
 
   /**
-   * @description Adds a new user story to the project
-   * @param {UserStory | UserStory[]} story
-   * @returns {Project} project
+   * @description Allows users to add a new department to the project
+   * @param name
+   * @returns
    */
-  public readonly addStory = (story: UserStory | UserStory[]): Project => {
-    if (Array.isArray(story)) {
-      story.forEach((s) => this._addStoryToProject(s));
+  public readonly addDepartment = (department: Department | Department[]): Project => {
+    if (Array.isArray(department)) {
+      department.forEach((d) => this.departments.add(d));
     } else {
-      this._addStoryToProject(story);
+      this.departments.add(department);
     }
+    return this;
+  };
 
+  public readonly setKey = (key: string): Project => {
+    this.key = key;
     return this;
   };
 
   /**
-   * @description a simple alias for addStory
+   * @description add milestone to project
    * @author Mike Rudge
-   * @date 14/11/2021
-   * @param {UserStory[]} stories
+   * @date 16/11/2021
+   * @param {(Milestone | Milestone[])} milestone
    * @memberof Project
    */
-  public readonly addStories = (stories: UserStory[]): Project => {
-    stories.forEach((story) => this.addStory(story));
+  public readonly addMilestone = (milestone: Milestone | Milestone[]): Project => {
+    if (Array.isArray(milestone)) {
+      milestone.forEach((m) => this.milestones.add(m));
+    } else {
+      this.milestones.add(milestone);
+    }
+    return this;
+  };
+
+  public readonly setOwner = (owner: TeamMember): Project => {
+    this.owner = owner;
+
     return this;
   };
 
@@ -211,15 +212,49 @@ export default class Project {
   };
 
   /**
-   * @description Allows users to add a new department to the project
-   * @param name
-   * @returns
+   * @description a simple alias for addStory
+   * @author Mike Rudge
+   * @date 14/11/2021
+   * @param {UserStory[]} stories
+   * @memberof Project
    */
-  public readonly addDepartment = (department: Department | Department[]): Project => {
-    if (Array.isArray(department)) {
-      department.forEach((d) => this.departments.add(d));
+  public readonly addStories = (stories: UserStory[]): Project => {
+    stories.forEach((story) => this.addStory(story));
+    return this;
+  };
+
+  /**
+   * @description Adds a new user story to the project
+   * @param {UserStory | UserStory[]} story
+   * @returns {Project} project
+   */
+  public readonly addStory = (story: UserStory | UserStory[]): Project => {
+    if (Array.isArray(story)) {
+      story.forEach((s) => this._addStoryToProject(s));
     } else {
-      this.departments.add(department);
+      this._addStoryToProject(story);
+    }
+
+    return this;
+  };
+
+  public readonly addTask = (tasks: Task | Task[]): Project => {
+    if (Array.isArray(tasks)) {
+      tasks.forEach((task) => {
+        this.tasks.add(task);
+      });
+    } else {
+      this.tasks.add(tasks);
+    }
+
+    return this;
+  };
+
+  public readonly addTeamMember = (teamMember: TeamMember | TeamMember[]): Project => {
+    if (Array.isArray(teamMember)) {
+      teamMember.forEach((member) => this.teamMembers.add(member));
+    } else {
+      this.teamMembers.add(teamMember);
     }
     return this;
   };
@@ -238,11 +273,7 @@ export default class Project {
     return this;
   };
 
-  private generateOutput = (): string => {
-    return JSON.stringify(this.stories, null, 2);
-  };
-
-  readonly outputStories = (
+  public readonly outputStories = (
     type: 'csv' | 'json' = 'json',
   ): string | undefined | { id: string | undefined; summary: string | undefined }[] => {
     const csvJson: { id: string; summary: string | undefined; tasks: Task[] }[] = [];
@@ -264,9 +295,18 @@ export default class Project {
     return csvJson;
   };
 
-  output = (): ProjectOutput => {
+  public addEpic = (epic: Epic | Epic[]): Project => {
+    if (Array.isArray(epic)) {
+      epic.forEach((e) => this._addEpicToProject(e));
+    } else {
+      this._addEpicToProject(epic);
+    }
+    return this;
+  };
+
+  public readonly output = (): ProjectOutput => {
     const stories: UserStoryOutput[] = [];
-    this.stories.forEach((story) => stories.push(story.create()));
+    this.stories.forEach((story) => stories.push(story.output()));
 
     const userTypes: UserTypeOutput[] = [];
     this.userTypes.forEach((type) => userTypes.push(type.output()));
@@ -301,6 +341,7 @@ export default class Project {
       epics: epics,
       sprints: sprints,
       teamMembers: teamMembers,
+      models: Array.from(this.models ?? []).map((model) => model.output()),
       totalStories: this.stories.size,
       totalDepartments: this.departments.size,
       totalPlatforms: this.platforms.size,
