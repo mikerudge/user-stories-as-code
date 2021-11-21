@@ -1,14 +1,14 @@
+import Project from '..';
+import CRUDStories from '../CRUDStories';
 import Department from '../department';
-import { Epic } from '../epic';
-import Project from '../index';
-import { Model } from '../model';
+import Epic from '../epic';
+import Milestone from '../milestone';
+import Model from '../model';
 import Permission from '../permission';
 import Task from '../task';
+import TeamMember from '../teamMember';
 import UserStory from '../userStory';
 import UserType from '../userType';
-import CRUDStories from '../CRUDStories';
-import Milestone from '../milestone';
-import TeamMember from '../teamMember';
 
 it('Create a new project', () => {
   // Define the different user types in the project
@@ -27,14 +27,14 @@ it('Create a new project', () => {
   const firstUserStory = new UserStory()
     .setAsA(admin)
     .setIWant('to be able to create a new project')
-    .setSoThat('I can start working on it')
+    .setSoICan('I can start working on it')
     .addTask(new Task({ title: 'Create a new project' }))
     .addTask(new Task({ title: 'Setup github repo' }))
     .setEpic(authEpic)
     .addDepartment(developers);
 
   const james = new TeamMember({ name: 'James ' });
-  firstUserStory.setAssignee(james);
+  firstUserStory.addAssignee(james);
 
   // Models
   const organisation = new Model({ name: 'Organisation' });
@@ -46,7 +46,7 @@ it('Create a new project', () => {
   const bookModel = new Model({ name: 'Book' });
 
   // An example of a task for a project
-  const projectTask = new Task({ title: 'Invite the team to the repo' }).setAssignee(james);
+  const projectTask = new Task({ title: 'Invite the team to the repo' }).addAssignee(james);
 
   // Create a new project that puts it all together
   const project = new Project({ name: 'Awesome Sauce' })

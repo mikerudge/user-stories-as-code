@@ -1,12 +1,12 @@
 import Department from '../department';
-import { Epic } from '../epic';
+import Epic from '../epic';
 import Milestone from '../milestone';
-import { Platform } from '../platforms';
+import Platform from '../platform';
 import Project from '../project';
 import Sprint from '../sprint';
 import TeamMember from '../teamMember';
-import UserStory from '../userStory';
 import UserType from '../userType';
+
 it('allows name to be set', () => {
   const project = new Project({ name: 'Project Test' });
 

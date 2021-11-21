@@ -26,7 +26,7 @@ const firstUserStory = new UserStory()
   .addDepartment(developers);
 
 const james = new TeamMember({ name: 'James ' });
-firstUserStory.setAssignee(james);
+firstUserStory.addAssignee(james);
 
 // Models
 const organisation = new Model({ name: 'Organisation' });
@@ -39,7 +39,7 @@ const taskModel = new Model({ name: 'Task' }).addPermission(new Permission({ use
 const bookModel = new Model({ name: 'Book' });
 
 // An example of a task for a project
-const projectTask = new Task({ title: 'Invite the team to the repo' }).setAssignee(james);
+const projectTask = new Task({ title: 'Invite the team to the repo' }).addAssignee(james);
 
 // Create a new project that puts it all together
 const project = new Project({ name: 'Awesome Sauce' })

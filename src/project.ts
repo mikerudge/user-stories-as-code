@@ -2,10 +2,10 @@ import json2csv from 'json2csv';
 import uniqid from 'uniqid';
 
 import Department, { DepartmentOut } from './department';
-import { Epic, EpicOutput } from './epic';
+import Epic, { EpicOutput } from './epic';
 import Milestone, { MilestoneOutput } from './milestone';
-import { Model, ModelOutput } from './model';
-import { Platform, PlatformOut } from './platforms';
+import Model, { ModelOutput } from './model';
+import Platform, { PlatformOut } from './platform';
 import Sprint, { SprintOut } from './sprint';
 import Task from './task';
 import TeamMember, { TeamMemberOutput } from './teamMember';

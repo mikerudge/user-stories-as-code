@@ -1,5 +1,5 @@
 import User from '../../userType';
-import { Model } from '../../model';
+import Model from '../../model';
 import Permission from '../../permission';
 import { ModelsToSketch } from '../../plugins/modelsToSketch';
 it('should create a sketch file', () => {

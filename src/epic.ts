@@ -1,4 +1,5 @@
 import uniqid from 'uniqid';
+
 import Milestone, { MilestoneOutput } from './milestone';
 
 type EpicProps = {
@@ -13,7 +14,7 @@ export type EpicOutput = {
   milestone: MilestoneOutput | undefined;
 } & Omit<EpicProps, 'milestone'>;
 
-export class Epic {
+export default class Epic {
   id: string;
   name: string;
   description: string;

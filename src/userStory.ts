@@ -1,11 +1,12 @@
-import { Platform, PlatformOut } from './platforms';
-import Task, { TaskOut } from './task';
-import UserType, { UserTypeOutput } from './userType';
 import uniqid from 'uniqid';
-import { Epic } from './epic';
+
 import Department, { DepartmentOut } from './department';
+import Epic from './epic';
+import Platform, { PlatformOut } from './platform';
 import Sprint from './sprint';
+import Task, { TaskOut } from './task';
 import TeamMember from './teamMember';
+import UserType, { UserTypeOutput } from './userType';
 
 export type UserStoryProps = {
   iWant?: string;

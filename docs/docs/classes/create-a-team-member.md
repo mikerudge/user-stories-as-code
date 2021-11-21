@@ -15,15 +15,15 @@ new Project().setOwner(james);
 ## Setting the assignee of a task
 
 ```typescript
-new Task().setAssignee(james);
+new Task().addAssignee(james);
 ```
 
 ## Setting the assignee of a story
 
 ```typescript
-new Story().setAssignee(james);
+new Story().addAssignee(james);
 // Or set many
-new Story().setAssignee([james, lisa]);
+new Story().addAssignee([james, lisa]);
 ```
 
 ### Note:

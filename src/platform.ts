@@ -8,7 +8,7 @@ export type PlatformOut = {
   id: string;
 } & PlatformProps;
 
-export class Platform {
+export default class Platform {
   name: string;
   id: string;
 

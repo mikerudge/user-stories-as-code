@@ -1,23 +1,17 @@
 import Project from '..';
 import CRUDStories from '../CRUDStories';
-import { Model } from '../model';
+import Model from '../model';
 import Permission from '../permission';
-
 import UserType from '../userType';
 
 it('Should create CRUD stories models', () => {
-  const restrictedUser = new UserType({ name: 'RestrictedUser' }).addPermissions({
-    actions: ['read'],
-    belongsTo: 'owner',
-  });
+  const restrictedUser = new UserType({ name: 'RestrictedUser' }).addPermissions(
+    new Permission({ actions: ['read'] }).setBelongsTo('owner'),
+  );
 
-  const adminUser = new UserType({ name: 'Admin' }).addPermissions({
-    actions: ['all'],
-  });
+  const adminUser = new UserType({ name: 'Admin' }).addPermissions(new Permission({ actions: ['all'] }));
 
-  const heroUser = new UserType({ name: 'Hero' }).addPermissions({
-    actions: ['read', 'create'],
-  });
+  const heroUser = new UserType({ name: 'Hero' }).addPermissions(new Permission({ actions: ['update', 'create'] }));
 
   const todoModel = new Model({ name: 'Todo' });
   const permission = new Permission({ belongsTo: todoModel, userType: restrictedUser });
@@ -38,7 +32,7 @@ it('Should create CRUD stories models', () => {
   const project = new Project({ name: 'test' });
   project.addStories(stories);
 
-  expect(project.stories.size).toBe(53);
+  expect(project.stories.size).toBe(56);
   // const story = stories[0];
   // expect(story.summary).toContain('not');
 });

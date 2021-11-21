@@ -1,4 +1,4 @@
-import { Model } from '../model';
+import Model from '../model';
 import Permission from '../permission';
 import UserType from '../userType';
 
@@ -88,4 +88,29 @@ it('Models with conflicting permissions should error', () => {
   expect(() => model.addPermission(conflictingPermission)).toThrowError(
     'Permission for action read has the opposite permission for User on model Model Test',
   );
+});
+
+it('Models that relate to each other should error', () => {
+  const model = new Model({ name: 'Model Test' });
+
+  expect(() => model.addRelation(model)).toThrowError();
+});
+
+it('Models can have relationships to other models', () => {
+  const model = new Model({ name: 'Model Test' });
+  const model2 = new Model({ name: 'Model Test2' }).addRelation(model);
+  const model3 = new Model({ name: 'Model Test3' })
+    .addRelation(model2)
+    .addRelation(model)
+    .addRelation(model)
+    .addRelation(model2)
+    .addRelation(model);
+
+  expect(model3.relations.size).toBe(2);
+  expect(model3.relations.has(model)).toBeTruthy();
+  expect(model3.relations.has(model2)).toBeTruthy();
+  expect(model3.relations.has(model3)).toBeFalsy();
+
+  expect(model2.relations.size).toBe(1);
+  expect(model2.relations.has(model)).toBeTruthy();
 });

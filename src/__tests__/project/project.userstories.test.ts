@@ -1,6 +1,6 @@
 import Department from '../../department';
-import { Epic } from '../../epic';
-import { Platform } from '../../platforms';
+import Epic from '../../epic';
+import Platform from '../../platform';
 import Project from '../../project';
 import Sprint from '../../sprint';
 import TeamMember from '../../teamMember';
@@ -28,7 +28,7 @@ describe('allows userStories to be added', () => {
   it('adds the assignee to the project', () => {
     const project = new Project({ name: 'Project Test' });
 
-    const userStory = new UserStory({ iWant: 'test', soICan: 'test' }).setAssignee(new TeamMember({ name: 'Test' }));
+    const userStory = new UserStory({ iWant: 'test', soICan: 'test' }).addAssignee(new TeamMember({ name: 'Test' }));
     project.addStory(userStory);
     expect(project.teamMembers.size).toBe(1);
   });
@@ -71,14 +71,14 @@ describe('allows userStories to be added', () => {
       .addDepartment(department)
       .setEpic(epic)
       .setSprint(sprint)
-      .setAssignee(assignee)
+      .addAssignee(assignee)
       .setPlatform(platform);
 
     const userStory2 = new UserStory({ asA: userType, iWant: 'test', soICan: 'test' })
       .addDepartment(department)
       .setEpic(epic)
       .setSprint(sprint)
-      .setAssignee(assignee)
+      .addAssignee(assignee)
       .setPlatform(platform);
 
     project.addStory(userStory).addStory(userStory2);

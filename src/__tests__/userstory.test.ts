@@ -1,6 +1,6 @@
 import Department from '../department';
-import { Epic } from '../epic';
-import { Platform } from '../platforms';
+import Epic from '../epic';
+import Platform from '../platform';
 import Sprint from '../sprint';
 import Task from '../task';
 import TeamMember from '../teamMember';

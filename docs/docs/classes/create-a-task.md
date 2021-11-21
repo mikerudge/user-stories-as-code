@@ -29,7 +29,7 @@ You can assign a single or multiple team members to a task.
 ```typescript
 const james = new TeamMember({ id: '123', name: 'James Brown', role: 'Developer' });
 
-const task = new Task({ ... }).setAssignee(james);
+const task = new Task({ ... }).addAssignee(james);
 ```
 
 Wow team members!!? That's right! Find out more next!

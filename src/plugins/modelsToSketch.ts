@@ -71,7 +71,7 @@ export class ModelsToSketch {
             if (obj.permission.belongsTo === 'owner') {
               text += ` if they are the owner`;
             } else {
-              text += ` if they belong to the same ${obj.permission.belongsTo.name}`;
+              text += ` if they belong to the same ${obj.permission?.belongsTo?.name}`;
             }
           }
           const TEXT_LAYER = new Text({

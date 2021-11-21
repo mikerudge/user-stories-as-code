@@ -1,6 +1,7 @@
-import Department from './department';
 import uniqid from 'uniqid';
-import Permission, { PermissionOutput, PermissionProps } from './permission';
+
+import Department from './department';
+import Permission, { PermissionOutput } from './permission';
 
 export type UserTypeProps = {
   name: string;

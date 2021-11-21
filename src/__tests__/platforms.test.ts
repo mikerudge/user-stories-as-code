@@ -1,4 +1,4 @@
-import { Platform } from '../platforms';
+import Platform from '../platform';
 
 it('allows name to be set', () => {
   const platform = new Platform({ name: 'Platform Test' });

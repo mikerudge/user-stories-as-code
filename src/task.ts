@@ -1,4 +1,5 @@
 import uniqid from 'uniqid';
+
 import TeamMember, { TeamMemberOutput } from './teamMember';
 import UserStory from './userStory';
 
@@ -50,7 +51,7 @@ export default class Task {
     return this;
   };
 
-  setAssignee = (assignee: TeamMember | TeamMember[]): Task => {
+  addAssignee = (assignee: TeamMember | TeamMember[]): Task => {
     if (Array.isArray(assignee)) {
       assignee.forEach((member) => this?.assignee?.add(member));
     } else {
@@ -59,7 +60,7 @@ export default class Task {
     return this;
   };
 
-  setUserStory = (userStory: UserStory | UserStory[]): Task => {
+  addUserStory = (userStory: UserStory | UserStory[]): Task => {
     if (Array.isArray(userStory)) {
       userStory.forEach((story) => {
         story.addTask(this);

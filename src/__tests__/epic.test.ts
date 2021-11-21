@@ -1,4 +1,4 @@
-import { Epic } from '../epic';
+import Epic from '../epic';
 import Milestone from '../milestone';
 
 it('allows name to be set', () => {

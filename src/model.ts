@@ -1,11 +1,12 @@
-import UserType, { UserTypeOutput } from './userType';
 import uniqid from 'uniqid';
+
 import Permission, { Action, PermissionOutput } from './permission';
-import CRUDStories from './CRUDStories';
+import UserType, { UserTypeOutput } from './userType';
 
 type ModelProps = {
   name?: string;
   permissions?: Permission[] | UserType[] | [Permission, UserType] | Permission | UserType;
+  relations?: Model | Model[];
 };
 
 export type ModelOutput = {
@@ -15,12 +16,13 @@ export type ModelOutput = {
   userTypes?: UserTypeOutput[];
 };
 
-export class Model {
+export default class Model {
   id: string;
   name: string | undefined;
   permissions: Set<Permission>;
   userTypes: Set<UserType>;
   actions: Set<Action> = new Set();
+  relations: Set<Model> = new Set();
 
   constructor(props?: ModelProps) {
     this.id = uniqid();
@@ -32,7 +34,27 @@ export class Model {
     if (props?.permissions) {
       this.addPermission(props.permissions);
     }
+
+    if (props?.relations) {
+      this.addRelation(props.relations);
+    }
   }
+
+  private readonly _addRelation = (relation: Model) => {
+    if (relation.id === this.id) {
+      throw new Error(`model ${relation.name} cannot relate to itself`);
+    }
+    this.relations.add(relation);
+  };
+
+  public readonly addRelation = (relation: Model | Model[]): Model => {
+    if (Array.isArray(relation)) {
+      relation.forEach((r) => this._addRelation(r));
+    } else {
+      this._addRelation(relation);
+    }
+    return this;
+  };
 
   public readonly setName = (name: string): Model => {
     this.name = name;
