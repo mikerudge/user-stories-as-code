@@ -1,3 +1,4 @@
+import { Permission } from '..';
 import Department from '../department';
 import Epic from '../epic';
 import Platform from '../platform';
@@ -180,6 +181,14 @@ it('can set assignee', () => {
   userStory.addAssignee(teamMember);
 
   expect(userStory.assignee.size).toBe(2);
+});
+
+it('can set asA with a permission', () => {
+  const admin = new UserType({ name: 'Admin' }).addPermission(new Permission({ actions: ['all'] }));
+
+  const userStory = new UserStory({ asA: admin });
+
+  expect(userStory.asA).toBe(admin);
 });
 
 it('can output to json', () => {

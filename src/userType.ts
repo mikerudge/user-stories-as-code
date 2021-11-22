@@ -17,12 +17,12 @@ export type UserTypeOutput = {
 export default class UserType {
   name: string;
   id: string;
-  permissions: Permission | undefined;
+  permission: Permission | undefined;
 
   constructor(props?: UserTypeProps) {
     this.name = props?.name ?? '';
     this.id = uniqid();
-    this.permissions = props?.permissions;
+    this.permission = props?.permissions;
   }
 
   setName = (name: string): UserType => {
@@ -34,17 +34,18 @@ export default class UserType {
     return {
       id: this.id,
       name: this.name,
-      permissions: this.permissions?.toJSON(),
+      permissions: this.permission?.toJSON(),
     };
   }
 
-  output = () => {
-    return this.toJSON();
-  };
-
-  addPermissions = (permission: Omit<Permission, 'userType'>): UserType => {
-    this.permissions = permission.setUserType(this);
+  addPermission = (permission: Omit<Permission, 'userType'>): UserType => {
+    const updatedPermission = permission.setUserType(this);
+    this.permission = updatedPermission;
 
     return this;
+  };
+
+  output = (): UserTypeOutput => {
+    return this.toJSON();
   };
 }

@@ -62,10 +62,13 @@ export default class Model {
   };
 
   private readonly getPermissionFromUserType = (userType: UserType): Permission => {
-    if (!userType.permissions) {
-      throw new Error(`UserType ${userType.name} does not have any permissions`);
+    if (!userType) {
+      throw new Error(`userType is not defined on userType ${this.name}`);
     }
-    return userType.permissions;
+    if (!userType?.permission) {
+      throw new Error(`UserType ${userType?.name} does not have any permission`);
+    }
+    return userType.permission;
   };
 
   /**

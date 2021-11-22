@@ -15,7 +15,7 @@ it('should create a sketch file', () => {
   const readerPerms = new Permission({ actions: ['read'], userType: reader });
 
   /* ------------------------------- Models ----------------------------------- */
-  const authorModel = new Model({ name: 'Author' })
+  const reviewModel = new Model({ name: 'Review' })
     .addPermission(authorPerms)
     .addPermission(adminPerms)
     .addPermission(authorReadPerm)
@@ -25,20 +25,28 @@ it('should create a sketch file', () => {
     .addPermission(authorPerms)
     .addPermission(authorReadPerm)
     .addPermission(readerPerms)
-    .addPermission(new Permission({ userType: author, actions: ['create', 'update'], belongsTo: 'owner' }));
-
-  const userModel = new Model({ name: 'User' })
-    .addPermission(authorReadPerm)
     .addPermission(new Permission({ userType: author, actions: ['create', 'update'], belongsTo: 'owner' }))
-    .addPermission(adminPerms);
+    .addRelation(reviewModel);
 
   const commentModel = new Model({ name: 'Comment' })
     .addPermission(authorPerms)
     .addPermission(authorReadPerm)
     .addPermission(readerPerms)
-    .addPermission(new Permission({ userType: author, actions: ['create', 'update'], belongsTo: bookModel }));
+    .addPermission(new Permission({ userType: author, actions: ['create', 'update'], belongsTo: bookModel }))
+    .addRelation(bookModel);
 
-  const modelsToSketch = new ModelsToSketch([authorModel, bookModel, userModel, commentModel]);
+  bookModel.addRelation(commentModel);
+  reviewModel.addRelation(bookModel);
+
+  const userModel = new Model({ name: 'User' })
+    .addPermission(authorReadPerm)
+    .addPermission(new Permission({ userType: author, actions: ['create', 'update'], belongsTo: 'owner' }))
+    .addPermission(adminPerms)
+    .addRelation(reviewModel)
+    .addRelation(bookModel)
+    .addRelation(commentModel);
+
+  const modelsToSketch = new ModelsToSketch([reviewModel, bookModel, userModel, commentModel]);
   const r = modelsToSketch.createSketch();
   expect(r).toBeDefined();
 });

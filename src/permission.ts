@@ -1,5 +1,5 @@
 import uniqid from 'uniqid';
-import { Model, ModelOutput } from './model';
+import Model, { ModelOutput } from './model';
 import UserType, { UserTypeOutput } from './userType';
 
 export type Action = 'create' | 'read' | 'update' | 'delete' | 'all' | 'deny';

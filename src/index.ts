@@ -12,6 +12,8 @@ import TeamMember from './teamMember';
 import UserStory from './userStory';
 import UserType from './userType';
 
+import { ModelsToSketch } from './plugins/modelsToSketch';
+
 export {
   Project,
   CRUDStories,
@@ -26,5 +28,6 @@ export {
   TeamMember,
   UserStory,
   UserType,
+  ModelsToSketch,
 };
 export default Project;

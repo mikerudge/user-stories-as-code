@@ -1,6 +1,6 @@
 import { Artboard, Page, Rect, Sketch, Text } from 'sketch-constructor';
 
-import { Model } from '../model';
+import Model from '../model';
 import Permission, { Action } from '../permission';
 import UserType from '../userType';
 
@@ -74,7 +74,7 @@ export class ModelsToSketch {
               text += ` if they belong to the same ${obj.permission?.belongsTo?.name}`;
             }
           }
-          const TEXT_LAYER = new Text({
+          const USER_ACTION_TEXT = new Text({
             string: text,
             name: obj.userType.name,
             fontSize: 8 * 4,
@@ -89,8 +89,33 @@ export class ModelsToSketch {
             },
           });
 
+          let relatedModels = '';
+          if (model.relations.size > 0) {
+            relatedModels += `Related Models:  `;
+            // for each related model
+            model.relations.forEach((relatedModel) => {
+              relatedModels += `${relatedModel.name}, `;
+            });
+          }
+
+          const RELATED_MODELS_TEXT = new Text({
+            string: relatedModels,
+            name: `related Models: obj.userType.name`,
+            fontSize: 8 * 4,
+            fontWeight: 'Bold',
+            color: '#ccc',
+            textAlignment: 'Center',
+            frame: {
+              width: 1024 - PADDING,
+              height: 70,
+              x: 0 + PADDING,
+              y: HEIGHT - PADDING,
+            },
+          });
+
           artBoards.forEach((artboard) => {
-            artboard.addLayer(TEXT_LAYER);
+            artboard.addLayer(USER_ACTION_TEXT);
+            artboard.addLayer(RELATED_MODELS_TEXT);
 
             page.addArtboard(artboard);
           });
