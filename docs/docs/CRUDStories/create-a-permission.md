@@ -17,7 +17,7 @@ const adminReadPermission = new Permission({ userType: admin, actions: ['read'],
 All permission will default as a grant permission but you can also set them to `deny`
 
 ```typescript
-adminUser.addPermissions({
+adminUser.addPermission({
   actions: ['all'],
   can: false,
 });
@@ -38,12 +38,12 @@ new Permission({ userType: admin, actions: ['read'], condition: 'owner' });
 Adding permissions to a user type is a default way to set permissions on all models. For example if you want an 'admin' who can do everything on every model.
 
 ```typescript
-adminUser.addPermissions({
+adminUser.addPermission({
   actions: ['create', 'read', 'update', 'delete'],
 });
 
 // Or you can just use 'all' as a helper
-adminUser.addPermissions({
+adminUser.addPermission({
   actions: ['all'],
 });
 ```

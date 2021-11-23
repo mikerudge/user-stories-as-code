@@ -28,7 +28,7 @@ const userModel = new Model({ name: 'User' }).addPermission(permission);
 Or if you add a user type with default permissions it can use those. For example adding an `admin` user which always has the same permissions.
 
 ```typescript
-const admin = new UserType({ name: 'Admin' }).addPermissions({
+const admin = new UserType({ name: 'Admin' }).addPermission({
   actions: ['all'],
 });
 

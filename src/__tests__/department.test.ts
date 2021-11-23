@@ -14,7 +14,3 @@ it('Department allows name to be set', () => {
   expect(department2.id).toBeDefined();
   expect(outputtedDepartment.id).toBeDefined();
 });
-
-// it('models should allow approved rules', () => {
-//   expect(true).toBe(false);
-// });
