@@ -30,14 +30,6 @@ export default class UserType {
     return this;
   };
 
-  toJSON(): UserTypeOutput {
-    return {
-      id: this.id,
-      name: this.name,
-      permissions: this.permission?.toJSON(),
-    };
-  }
-
   addPermission = (permission: Omit<Permission, 'userType'>): UserType => {
     const updatedPermission = permission.setUserType(this);
     this.permission = updatedPermission;
@@ -45,7 +37,15 @@ export default class UserType {
     return this;
   };
 
-  output = (): UserTypeOutput => {
-    return this.toJSON();
+  toJSON(ignore?: 'permissions' | 'name'): UserTypeOutput {
+    return {
+      id: this.id,
+      name: this.name,
+      permissions: ignore === 'permissions' ? null : this.permission?.toJSON(),
+    };
+  }
+
+  output = (ignore?: 'permissions' | 'name'): UserTypeOutput => {
+    return this.toJSON(ignore);
   };
 }

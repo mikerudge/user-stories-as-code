@@ -198,7 +198,7 @@ export default class UserStory {
       key: this.key,
       summary: this.summary?.toString() ?? '',
       description: this.description?.toString() ?? '',
-      userType: this.asA?.output(),
+      userType: this.asA?.toJSON(),
       asA: this.asA?.name ?? '',
       iWant: this.iWant?.toString(),
       soICan: this.soICan?.toString(),

@@ -40,7 +40,7 @@ export default class Permission {
 
     return {
       id: this.id,
-      userType: this.userType?.output(),
+      userType: this.userType?.output('permissions'),
       belongsTo: belongsTo,
       actions: Array.from(this.actions),
       can: this.can,

@@ -194,6 +194,7 @@ it('can set asA with a permission', () => {
 it('can output to json', () => {
   const assignee = new TeamMember({ name: 'test' });
   const teamMember = new TeamMember({ name: 'test' });
+  const admin = new UserType({ name: 'Admin' }).addPermission(new Permission({ actions: ['all'] }));
 
   const userStory = new UserStory({
     assignee: [assignee],
@@ -201,7 +202,18 @@ it('can output to json', () => {
     soICan: 'believe',
     asA: new UserType({ name: 'user type test' }),
   });
+
+  const userStory2 = new UserStory({
+    assignee: [assignee],
+    iWant: 'to pass test',
+    soICan: 'believe',
+    asA: admin,
+  });
+
   userStory.addAssignee(teamMember);
   const out = userStory.output();
   expect(out.id).toBeDefined();
+
+  const out2 = userStory2.output();
+  expect(out2.id).toBeDefined();
 });
