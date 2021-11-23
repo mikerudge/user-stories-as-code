@@ -1,11 +1,12 @@
 {
   "name": "user-stories-as-code",
-  "version": "0.0.6-alpha",
+  "version": "0.0.8-alpha",
   "description": "A package for generating user stories using only typescript",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "build": "esbuild ./src/index.ts --bundle --platform=node --target=node10.4 --outfile=./lib/index.js --external:uniqid",
+    "build": "tsc",
+    "esbuild": "esbuild ./src/index.ts --bundle --platform=node --target=node10.4 --outfile=./lib/index.js --external:uniqid",
     "format": "prettier --write \"src/**/*.(js|ts)\"",
     "lint": "eslint src --ext .js,.ts",
     "lint:fix": "eslint src --fix --ext .js,.ts",
@@ -49,7 +50,6 @@
   ],
   "dependencies": {
     "json2csv": "^5.0.6",
-    "sketch-constructor": "^1.26.0",
     "uniqid": "^5.4.0"
   }
 }

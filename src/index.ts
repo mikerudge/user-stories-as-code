@@ -12,7 +12,7 @@ import TeamMember from './teamMember';
 import UserStory from './userStory';
 import UserType from './userType';
 
-import { ModelsToSketch } from './plugins/modelsToSketch';
+// import { ModelsToSketch } from './plugins/modelsToSketch';
 
 export {
   Project,
@@ -28,6 +28,6 @@ export {
   TeamMember,
   UserStory,
   UserType,
-  ModelsToSketch,
+  // ModelsToSketch,
 };
 export default Project;
