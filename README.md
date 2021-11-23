@@ -1,14 +1,7 @@
-# NPM TypeScript Module Boilerplate
+# User stories as code
 
-> Note: This module should **not** be required!
+Check out the [docs here](https://mikerudge.github.io/user-stories-as-code/)
 
-### What is it?
+## Getting started
 
-This is the boilerplate that you can use to build your awesome NPM modules using TypeScript ✨
-
-### How to use it?
-
-There are 2 ways to use it:
-
-1. Go to the [repository page](https://github.com/uWynell/typescript-module-boilerplate) and press the green **"Use this template"** button.
-2. Run the following command in the terminal: ```npx degit uWynell/typescript-module-boilerplate```
+`yarn add user-stories-as-code`
