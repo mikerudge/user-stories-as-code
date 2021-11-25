@@ -1,7 +1,7 @@
 import uniqid from 'uniqid';
 
 import Department, { DepartmentOut } from './department';
-import Epic from './epic';
+import Epic, { EpicOutput } from './epic';
 import Platform, { PlatformOut } from './platform';
 import Sprint from './sprint';
 import Task, { TaskOut } from './task';
@@ -32,7 +32,8 @@ export type UserStoryOutput = {
   asA: string;
   departments?: DepartmentOut[];
   userType: UserTypeOutput | undefined;
-} & Omit<UserStoryProps, 'asA' | 'tasks' | 'platform' | 'departments'>;
+  epic?: EpicOutput;
+} & Omit<UserStoryProps, 'asA' | 'tasks' | 'platform' | 'departments' | 'epic'>;
 
 export default class UserStory {
   public readonly id: string = uniqid();
@@ -194,6 +195,7 @@ export default class UserStory {
 
     const out: UserStoryOutput = {
       id: this.id.toString(),
+      epic: this.epic?.output(),
       key: this.key,
       summary: this.summary?.toString() ?? '',
       description: this.description?.toString() ?? '',

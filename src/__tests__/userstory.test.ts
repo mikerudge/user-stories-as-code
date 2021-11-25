@@ -203,12 +203,13 @@ it('can output to json', () => {
     asA: new UserType({ name: 'user type test' }),
   });
 
+  const epic = new Epic({ name: 'Test Epic' });
   const userStory2 = new UserStory({
     assignee: [assignee],
     iWant: 'to pass test',
     soICan: 'believe',
     asA: admin,
-  });
+  }).setEpic(epic);
 
   userStory.addAssignee(teamMember);
   const out = userStory.output();
@@ -216,4 +217,5 @@ it('can output to json', () => {
 
   const out2 = userStory2.output();
   expect(out2.id).toBeDefined();
+  expect(out2?.epic?.id).toBeDefined();
 });
