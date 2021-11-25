@@ -47,7 +47,7 @@ export default class Permission {
     };
   }
 
-  output = (type: 'csv' | 'json'): PermissionOutput => {
+  public output(type: 'csv' | 'json'): PermissionOutput {
     if (type === 'csv') {
       return this.toJSON();
     }
@@ -55,22 +55,22 @@ export default class Permission {
       return this.toJSON();
     }
     return this.toJSON();
-  };
+  }
 
-  setUserType = (userType: UserType): Permission => {
+  public setUserType(userType: UserType): Permission {
     this.userType = userType;
     return this;
-  };
+  }
 
-  setBelongsTo = (belongsTo: null | 'owner' | undefined | Model): Permission => {
+  setBelongsTo(belongsTo: null | 'owner' | undefined | Model): Permission {
     this.belongsTo = belongsTo;
     return this;
-  };
+  }
 
-  setCan = (can: boolean): Permission => {
+  public setCan(can: boolean): Permission {
     this.can = can;
     return this;
-  };
+  }
 
   private readonly _setAction = (action: Action): Permission => {
     if (action === 'all') {
@@ -84,12 +84,12 @@ export default class Permission {
     return this;
   };
 
-  readonly setActions = (actions: Action | Action[] | null): Permission => {
+  public setActions(actions: Action | Action[] | null): Permission {
     if (Array.isArray(actions)) {
       actions.forEach((action) => this._setAction(action));
     } else if (typeof actions === 'string') {
       this._setAction(actions);
     }
     return this;
-  };
+  }
 }

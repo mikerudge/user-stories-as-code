@@ -31,36 +31,36 @@ export default class Task {
     this.assignee = new Set(props?.assignee);
   }
 
-  setTitle = (title: string): Task => {
+  setTitle(title: string): Task {
     this.title = title;
     return this;
-  };
+  }
 
-  setStatus = (status: string): Task => {
+  setStatus(status: string): Task {
     this.status = status;
     return this;
-  };
+  }
 
-  setPriority = (priority: number): Task => {
+  setPriority(priority: number): Task {
     this.priority = priority;
     return this;
-  };
+  }
 
-  setDescription = (description: string): Task => {
+  setDescription(description: string): Task {
     this.description = description;
     return this;
-  };
+  }
 
-  addAssignee = (assignee: TeamMember | TeamMember[]): Task => {
+  addAssignee(assignee: TeamMember | TeamMember[]): Task {
     if (Array.isArray(assignee)) {
       assignee.forEach((member) => this?.assignee?.add(member));
     } else {
       this.assignee?.add(assignee);
     }
     return this;
-  };
+  }
 
-  addUserStory = (userStory: UserStory | UserStory[]): Task => {
+  addUserStory(userStory: UserStory | UserStory[]): Task {
     if (Array.isArray(userStory)) {
       userStory.forEach((story) => {
         story.addTask(this);
@@ -69,9 +69,9 @@ export default class Task {
       userStory.addTask(this);
     }
     return this;
-  };
+  }
 
-  output = (): TaskOut => {
+  output(): TaskOut {
     return {
       id: this.id,
       title: this.title,
@@ -80,5 +80,5 @@ export default class Task {
       status: this.status,
       assignee: Array.from(this.assignee).map((member) => member.output()),
     };
-  };
+  }
 }

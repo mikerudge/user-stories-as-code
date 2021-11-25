@@ -17,19 +17,19 @@ export default class Platform {
     this.id = uniqid();
   }
 
-  setName = (name: string): Platform => {
+  public setName(name: string): Platform {
     this.name = name;
     return this;
-  };
+  }
 
-  toJSON(): PlatformOut {
+  private toJSON(): PlatformOut {
     return {
       id: this.id,
       name: this.name,
     };
   }
 
-  output = (): PlatformOut => {
+  public output(): PlatformOut {
     return this.toJSON();
-  };
+  }
 }

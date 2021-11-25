@@ -47,19 +47,19 @@ export default class Model {
     this.relations.add(relation);
   };
 
-  public readonly addRelation = (relation: Model | Model[]): Model => {
+  public addRelation(relation: Model | Model[]): Model {
     if (Array.isArray(relation)) {
       relation.forEach((r) => this._addRelation(r));
     } else {
       this._addRelation(relation);
     }
     return this;
-  };
+  }
 
-  public readonly setName = (name: string): Model => {
+  public setName(name: string): Model {
     this.name = name;
     return this;
-  };
+  }
 
   private readonly getPermissionFromUserType = (userType: UserType): Permission => {
     if (!userType) {
@@ -120,9 +120,7 @@ export default class Model {
    * @param {(Permission | Permission[])} permission
    * @memberof Model
    */
-  public readonly addPermission = (
-    permission: Permission | Permission[] | UserType | UserType[] | [Permission, UserType],
-  ): Model => {
+  public addPermission(permission: Permission | Permission[] | UserType | UserType[] | [Permission, UserType]): Model {
     if (Array.isArray(permission)) {
       permission.forEach((perm) => {
         this._addPermissionToModel(perm);
@@ -132,9 +130,9 @@ export default class Model {
     }
 
     return this;
-  };
+  }
 
-  toJSON(): ModelOutput {
+  private toJSON(): ModelOutput {
     const permissions: PermissionOutput[] = [];
     this.permissions.forEach((permission) => {
       permissions.push(permission.toJSON());

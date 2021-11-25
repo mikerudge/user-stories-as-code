@@ -90,14 +90,14 @@ export default class Project {
     this.models = new Set(props.models);
   }
 
-  public readonly addModel = (model: Model | Model[]): Project => {
+  public addModel(model: Model | Model[]): Project {
     if (Array.isArray(model)) {
       model.forEach((m) => this.models.add(m));
     } else {
       this.models.add(model);
     }
     return this;
-  };
+  }
 
   private _addEpicToProject = (epic: Epic) => {
     this.epics.add(epic);
@@ -140,11 +140,7 @@ export default class Project {
     }
   };
 
-  private generateOutput = (): string => {
-    return JSON.stringify(this.stories, null, 2);
-  };
-
-  public readonly addSprint = (sprint: Sprint | Sprint[]): Project => {
+  public addSprint(sprint: Sprint | Sprint[]): Project {
     if (Array.isArray(sprint)) {
       sprint.forEach((s) => this.addSprint(s));
     } else {
@@ -152,26 +148,26 @@ export default class Project {
     }
 
     return this;
-  };
+  }
 
   /**
    * @description Allows users to add a new department to the project
    * @param name
    * @returns
    */
-  public readonly addDepartment = (department: Department | Department[]): Project => {
+  public addDepartment(department: Department | Department[]): Project {
     if (Array.isArray(department)) {
       department.forEach((d) => this.departments.add(d));
     } else {
       this.departments.add(department);
     }
     return this;
-  };
+  }
 
-  public readonly setKey = (key: string): Project => {
+  public setKey(key: string): Project {
     this.key = key;
     return this;
-  };
+  }
 
   /**
    * @description add milestone to project
@@ -180,20 +176,20 @@ export default class Project {
    * @param {(Milestone | Milestone[])} milestone
    * @memberof Project
    */
-  public readonly addMilestone = (milestone: Milestone | Milestone[]): Project => {
+  public addMilestone(milestone: Milestone | Milestone[]): Project {
     if (Array.isArray(milestone)) {
       milestone.forEach((m) => this.milestones.add(m));
     } else {
       this.milestones.add(milestone);
     }
     return this;
-  };
+  }
 
-  public readonly setOwner = (owner: TeamMember): Project => {
+  public setOwner(owner: TeamMember): Project {
     this.owner = owner;
 
     return this;
-  };
+  }
 
   /**
    * @description add a platform to the project
@@ -202,14 +198,14 @@ export default class Project {
    * @param {Platform} platform
    * @memberof Project
    */
-  public readonly addPlatform = (platform: Platform | Platform[]): Project => {
+  public addPlatform(platform: Platform | Platform[]): Project {
     if (Array.isArray(platform)) {
       platform.forEach((p) => this.platforms.add(p));
     } else {
       this.platforms.add(platform);
     }
     return this;
-  };
+  }
 
   /**
    * @description a simple alias for addStory
@@ -218,17 +214,17 @@ export default class Project {
    * @param {UserStory[]} stories
    * @memberof Project
    */
-  public readonly addStories = (stories: UserStory[]): Project => {
+  public addStories(stories: UserStory[]): Project {
     stories.forEach((story) => this.addStory(story));
     return this;
-  };
+  }
 
   /**
    * @description Adds a new user story to the project
    * @param {UserStory | UserStory[]} story
    * @returns {Project} project
    */
-  public readonly addStory = (story: UserStory | UserStory[]): Project => {
+  public addStory(story: UserStory | UserStory[]): Project {
     if (Array.isArray(story)) {
       story.forEach((s) => this._addStoryToProject(s));
     } else {
@@ -236,9 +232,9 @@ export default class Project {
     }
 
     return this;
-  };
+  }
 
-  public readonly addTask = (tasks: Task | Task[]): Project => {
+  public addTask(tasks: Task | Task[]): Project {
     if (Array.isArray(tasks)) {
       tasks.forEach((task) => {
         this.tasks.add(task);
@@ -248,34 +244,34 @@ export default class Project {
     }
 
     return this;
-  };
+  }
 
-  public readonly addTeamMember = (teamMember: TeamMember | TeamMember[]): Project => {
+  public addTeamMember(teamMember: TeamMember | TeamMember[]): Project {
     if (Array.isArray(teamMember)) {
       teamMember.forEach((member) => this.teamMembers.add(member));
     } else {
       this.teamMembers.add(teamMember);
     }
     return this;
-  };
+  }
 
   /**
    * @description Allows users to add a new user type to the project
    * @param params UserTypeProps
    * @returns
    */
-  public readonly addUserType = (userType: UserType | UserType[]): Project => {
+  public addUserType(userType: UserType | UserType[]): Project {
     if (Array.isArray(userType)) {
       userType.forEach((u) => this.userTypes.add(u));
     } else {
       this.userTypes.add(userType);
     }
     return this;
-  };
+  }
 
-  public readonly outputStories = (
+  public outputStories(
     type: 'csv' | 'json' = 'json',
-  ): string | undefined | { id: string | undefined; summary: string | undefined }[] => {
+  ): string | undefined | { id: string | undefined; summary: string | undefined }[] {
     const csvJson: { id: string; summary: string | undefined; tasks: Task[] }[] = [];
 
     this.stories.forEach((story) => {
@@ -293,18 +289,18 @@ export default class Project {
     }
 
     return csvJson;
-  };
+  }
 
-  public addEpic = (epic: Epic | Epic[]): Project => {
+  public addEpic(epic: Epic | Epic[]): Project {
     if (Array.isArray(epic)) {
       epic.forEach((e) => this._addEpicToProject(e));
     } else {
       this._addEpicToProject(epic);
     }
     return this;
-  };
+  }
 
-  public readonly output = (): ProjectOutput => {
+  public output(): ProjectOutput {
     const stories: UserStoryOutput[] = [];
     this.stories.forEach((story) => stories.push(story.output()));
 
@@ -351,5 +347,5 @@ export default class Project {
       totalMilestones: this.milestones.size,
       totalTeamMembers: this.teamMembers.size,
     };
-  };
+  }
 }

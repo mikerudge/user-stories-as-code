@@ -68,7 +68,7 @@ export default class CRUDStories {
    * @param {Model} model
    * @memberof GenerateCRUDStories
    */
-  private readonly _createCreateUserStories = (permission: Permission, model: Model): CRUDStories => {
+  private readonly _addCreateUserStories = (permission: Permission, model: Model): CRUDStories => {
     if (permission.actions.has('create')) {
       /* -------------------------- Create Users stories -------------------------- */
 
@@ -123,24 +123,32 @@ export default class CRUDStories {
    * @param {Model} model
    * @memberof CRUDStories
    */
-  private readonly _createReadStories = (permission: Permission, model: Model): CRUDStories => {
+  private readonly _addReadStories = (permission: Permission, model: Model): CRUDStories => {
     if (permission.can) {
-      if (typeof permission.belongsTo !== 'string') {
-        // Belongs to a  model.
-        const modelName = permission.belongsTo?.name;
+      if (typeof permission.belongsTo !== 'string' && permission.belongsTo?.name) {
+        /* -------------------------------------------------------------------------- */
+        /*                            Belongs to a  model.                            */
+        /* -------------------------------------------------------------------------- */
+        const modelName = permission.belongsTo.name?.toLocaleLowerCase();
+
         const belongToTask = new Task({
           title: `Reject requests for ${model.name} if the user is not part of ${modelName}`,
         });
 
+        // As a Author, I want to only read comments that are connected to my book
+        // As a Business Owner, I want to only read reviews that are connected to my Business
         this._addStory(
           new UserStory({
             asA: permission.userType,
-            iWant: `to only access ${model.name}s that are in my ${modelName}`,
+            iWant: `to only read ${model.name}s that are connected to my ${modelName}`,
           }).addTask(belongToTask),
         );
       }
 
       if (permission.belongsTo === 'owner') {
+        /* -------------------------------------------------------------------------- */
+        /*                           Only the owner can read                          */
+        /* -------------------------------------------------------------------------- */
         const ownerTask = new Task({ title: `Reject requests for ${model.name} if the user is not the owner` });
         this._addStory(
           new UserStory({
@@ -167,7 +175,11 @@ export default class CRUDStories {
         );
       } else {
         this._addStory(
-          new UserStory({ asA: permission.userType, iWant: `List all ${model.name}s`, soICan: 'easily navigate' }),
+          new UserStory({
+            asA: permission.userType,
+            iWant: `to see a list of all ${model.name}s`,
+            soICan: `see an overview of all ${model.name}s`,
+          }),
         );
 
         if (this.canFilterList) {
@@ -175,7 +187,7 @@ export default class CRUDStories {
             new UserStory({
               asA: permission.userType,
               iWant: `to be able to filter ${model.name}s`,
-              soICan: 'filter the list',
+              soICan: `easily find the ${model.name} I am looking for`,
             }),
           );
         }
@@ -185,7 +197,7 @@ export default class CRUDStories {
             new UserStory({
               asA: permission.userType,
               iWant: `to be able to sort ${model.name}s`,
-              soICan: 'sort the list',
+              soICan: '',
             }),
           );
         }
@@ -195,7 +207,7 @@ export default class CRUDStories {
             new UserStory({
               asA: permission.userType,
               iWant: `to be able to paginate ${model.name}s`,
-              soICan: 'paginate the list',
+              soICan: '',
             }),
           );
         }
@@ -203,7 +215,7 @@ export default class CRUDStories {
         this._addStory(
           new UserStory({
             asA: permission.userType,
-            iWant: `See a single ${model.name?.toLocaleLowerCase()}`,
+            iWant: `to see a single ${model.name?.toLocaleLowerCase()}`,
             soICan: 'see more in depth information',
           }),
         );
@@ -212,7 +224,7 @@ export default class CRUDStories {
       this._addStory(
         new UserStory({
           asA: permission.userType,
-          iWant: `only see ${model}s that I have access to`,
+          iWant: `to NOT see any ${model.name}`,
           soICan: '',
         }),
       );
@@ -230,17 +242,54 @@ export default class CRUDStories {
    * @param {Model} model
    * @memberof CRUDStories
    */
-  private readonly _createUpdateStories = (permission: Permission, model: Model): CRUDStories => {
+  private readonly _addUpdateStories = (permission: Permission, model: Model): CRUDStories => {
     if (permission.actions.has('update')) {
       if (permission.can) {
-        this._addStory(
-          new UserStory({ asA: permission.userType, iWant: `update ${model.name}s`, soICan: 'change information' }),
-        );
+        if (permission.belongsTo === 'owner') {
+          this._addStory(
+            new UserStory({
+              asA: permission.userType,
+              iWant: `update ${model.name}s that I own`,
+              soICan: `make changes to my ${model.name}`,
+            }),
+          );
+        } else if (permission.belongsTo?.name) {
+          this._addStory(
+            new UserStory({
+              asA: permission.userType,
+              iWant: `update ${model.name}s that belong to ${permission.belongsTo.name}`,
+              soICan: `make changes to ${model.name}`,
+            }).addTask([
+              new Task({
+                title: `Make sure an error is shown to the ${permission.userType} when attempting to update ${model.name} that does not belong to ${permission.belongsTo.name}`,
+              }),
+              new Task({
+                title: `Reject requests to update ${model.name}s that don't belong to the users ${permission.belongsTo.name}`,
+              }),
+            ]),
+          );
+        } else {
+          this._addStory(
+            new UserStory({
+              asA: permission.userType,
+              iWant: `update all ${model.name}s on the system`,
+              soICan: `make changes on any ${model.name}`,
+            }),
+          );
+        }
       }
 
       if (!permission.can) {
         this._addStory(
-          new UserStory({ asA: permission.userType, iWant: `to not be able to update ${model.name}s`, soICan: '' }),
+          new UserStory({
+            asA: permission.userType,
+            iWant: `to denied from updating ${model.name}s`,
+            soICan: '',
+          }).addTask(
+            new Task({
+              title: `Make sure an error is shown to the ${permission.userType} when attempting to update ${model.name}`,
+            }),
+          ),
         );
       }
     }
@@ -256,7 +305,7 @@ export default class CRUDStories {
    * @param {Model} model
    * @memberof CRUDStories
    */
-  private readonly _createDeleteStories = (permission: Permission, model: Model): CRUDStories => {
+  private readonly _addDeleteStories = (permission: Permission, model: Model): CRUDStories => {
     if (permission.can) {
       if (permission.belongsTo === 'owner') {
         this._addStory(
@@ -305,7 +354,7 @@ export default class CRUDStories {
    * @param {Model} model
    * @memberof CRUDStories
    */
-  private readonly _createModelStories = (permission: Permission, model: Model): CRUDStories => {
+  private readonly _addModelStories = (permission: Permission, model: Model): CRUDStories => {
     this._addStory(
       new UserStory({
         asA: permission.userType,
@@ -324,27 +373,27 @@ export default class CRUDStories {
     this.models.forEach((model) => {
       model.permissions.forEach((permission) => {
         if (permission.actions.has('all')) {
-          this._createReadStories(permission, model);
-          this._createUpdateStories(permission, model);
-          this._createDeleteStories(permission, model);
-          this._createCreateUserStories(permission, model);
-          this._createModelStories(permission, model);
+          this._addReadStories(permission, model);
+          this._addUpdateStories(permission, model);
+          this._addDeleteStories(permission, model);
+          this._addCreateUserStories(permission, model);
+          this._addModelStories(permission, model);
           return this;
         }
 
         if (permission.actions.has('create')) {
-          this._createCreateUserStories(permission, model);
+          this._addCreateUserStories(permission, model);
         }
         if (permission.actions.has('read')) {
-          this._createReadStories(permission, model);
+          this._addReadStories(permission, model);
         }
         if (permission.actions.has('update')) {
-          this._createUpdateStories(permission, model);
+          this._addUpdateStories(permission, model);
         }
         if (permission.actions.has('delete')) {
-          this._createDeleteStories(permission, model);
+          this._addDeleteStories(permission, model);
         }
-        this._createModelStories(permission, model);
+        this._addModelStories(permission, model);
       });
     });
 

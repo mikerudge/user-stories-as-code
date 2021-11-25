@@ -36,15 +36,15 @@ export default class Epic {
    * @param {string} name
    * @memberof Epic
    */
-  setName = (name: string): Epic => {
+  public setName(name: string): Epic {
     this.name = name;
     return this;
-  };
+  }
 
-  setMilestone = (milestone: Milestone): Epic => {
+  public setMilestone(milestone: Milestone): Epic {
     this.milestone = milestone;
     return this;
-  };
+  }
 
   /**
    * @description
@@ -53,23 +53,23 @@ export default class Epic {
    * @param {string} description
    * @memberof Epic
    */
-  setDescription = (description: string): Epic => {
+  public setDescription(description: string): Epic {
     this.description = description;
     return this;
-  };
+  }
 
-  setColor = (color: string): Epic => {
+  public setColor(color: string): Epic {
     this.color = color;
 
     return this;
-  };
+  }
 
-  addMilestone = (milestone: Milestone): Epic => {
+  public addMilestone(milestone: Milestone): Epic {
     this.milestone = milestone;
     return this;
-  };
+  }
 
-  toJSON = (): EpicOutput => {
+  private toJSON(): EpicOutput {
     return {
       id: this.id,
       name: this.name,
@@ -77,9 +77,9 @@ export default class Epic {
       color: this.color,
       milestone: this.milestone?.output(),
     };
-  };
+  }
 
-  output = (): EpicOutput => {
+  public output(): EpicOutput {
     return this.toJSON();
-  };
+  }
 }

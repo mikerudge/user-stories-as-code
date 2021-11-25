@@ -35,7 +35,7 @@ export type UserStoryOutput = {
 } & Omit<UserStoryProps, 'asA' | 'tasks' | 'platform' | 'departments'>;
 
 export default class UserStory {
-  readonly id: string;
+  public readonly id: string = uniqid();
   public iWant: string;
   public asA: UserType | undefined;
   public soICan: string | undefined;
@@ -53,7 +53,6 @@ export default class UserStory {
   public assignee: Set<TeamMember>;
 
   constructor(public props?: UserStoryProps) {
-    this.id = uniqid();
     this.points = props?.points ?? 0;
     this.iWant = props?.iWant ?? 'New User Story';
     this.asA = props?.asA;

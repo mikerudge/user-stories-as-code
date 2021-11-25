@@ -25,31 +25,31 @@ export default class Milestone {
     this.endDate = params?.endDate;
   }
 
-  setName = (name: string): Milestone => {
+  public setName(name: string): Milestone {
     this.name = name;
     return this;
-  };
+  }
 
-  setStartDate = (startDate: Date): Milestone => {
+  public setStartDate(startDate: Date): Milestone {
     this.startDate = startDate;
     return this;
-  };
+  }
 
-  setEndDate = (endDate: Date): Milestone => {
+  public setEndDate(endDate: Date): Milestone {
     this.endDate = endDate;
     return this;
-  };
+  }
 
-  toJSON = (): MilestoneOutput => {
+  private toJSON(): MilestoneOutput {
     return {
       id: this.id,
       name: this.name,
       startDate: this.startDate?.toISOString() ?? undefined,
       endDate: this.endDate?.toISOString() ?? undefined,
     };
-  };
+  }
 
-  output = (): MilestoneOutput => {
+  public output(): MilestoneOutput {
     return this.toJSON();
-  };
+  }
 }

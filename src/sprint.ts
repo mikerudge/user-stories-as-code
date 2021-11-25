@@ -24,39 +24,39 @@ export default class Sprint {
     this.endDate = params?.endDate ?? new Date();
   }
 
-  getId(): string {
+  public getId(): string {
     return this.id;
   }
 
-  getName(): string {
+  public getName(): string {
     return this.name;
   }
 
-  getStartDate(): Date {
+  public getStartDate(): Date {
     return this.startDate;
   }
 
-  setName(name: string): Sprint {
+  public setName(name: string): Sprint {
     this.name = name;
     return this;
   }
 
-  setStartDate(startDate: Date): Sprint {
+  public setStartDate(startDate: Date): Sprint {
     this.startDate = startDate;
     return this;
   }
 
-  setEndDate(endDate: Date): Sprint {
+  public setEndDate(endDate: Date): Sprint {
     this.endDate = endDate;
     return this;
   }
 
-  output = (): SprintOut => {
+  public output(): SprintOut {
     return {
       id: this.id,
       name: this.name,
       startDate: this.startDate,
       endDate: this.endDate,
     };
-  };
+  }
 }

@@ -12,7 +12,7 @@ export type TeamMemberOutput = {
 } & Props;
 
 export default class TeamMember {
-  id: string;
+  public id: string;
   name: string;
   role: string | undefined;
   avatar: string | undefined;
@@ -23,27 +23,27 @@ export default class TeamMember {
     this.avatar = props.avatar;
   }
 
-  public setName = (name: string): TeamMember => {
+  public setName(name: string): TeamMember {
     this.name = name;
     return this;
-  };
+  }
 
-  public setRole = (role: string): TeamMember => {
+  public setRole(role: string): TeamMember {
     this.role = role;
     return this;
-  };
+  }
 
-  public setAvatar = (avatar: string): TeamMember => {
+  public setAvatar(avatar: string): TeamMember {
     this.avatar = avatar;
     return this;
-  };
+  }
 
-  public setId = (id: string): TeamMember => {
+  public setId(id: string): TeamMember {
     this.id = id;
     return this;
-  };
+  }
 
-  toJSON(): TeamMemberOutput {
+  private toJSON(): TeamMemberOutput {
     return {
       id: this.id,
       name: this.name,
@@ -52,7 +52,7 @@ export default class TeamMember {
     };
   }
 
-  output = (): TeamMemberOutput => {
+  public output(): TeamMemberOutput {
     return this.toJSON();
-  };
+  }
 }

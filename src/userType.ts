@@ -15,27 +15,26 @@ export type UserTypeOutput = {
 } & Omit<UserTypeProps, 'permissions'>;
 
 export default class UserType {
-  name: string;
-  id: string;
+  public readonly id: string = uniqid();
+  public name: string;
   permission: Permission | undefined;
 
   constructor(props?: UserTypeProps) {
     this.name = props?.name ?? '';
-    this.id = uniqid();
     this.permission = props?.permissions;
   }
 
-  setName = (name: string): UserType => {
+  setName(name: string): UserType {
     this.name = name;
     return this;
-  };
+  }
 
-  addPermission = (permission: Omit<Permission, 'userType'>): UserType => {
+  addPermission(permission: Omit<Permission, 'userType'>): UserType {
     const updatedPermission = permission.setUserType(this);
     this.permission = updatedPermission;
 
     return this;
-  };
+  }
 
   toJSON(ignore?: 'permissions' | 'name'): UserTypeOutput {
     return {

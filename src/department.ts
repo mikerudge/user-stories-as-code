@@ -17,18 +17,14 @@ export default class Department {
     this.id = uniqid();
   }
 
-  public getName = (): string => {
-    return this.name;
-  };
-
-  public output = (): DepartmentOut => {
-    return this.toJSON();
-  };
-
-  public setName = (name: string): Department => {
+  public setName(name: string): Department {
     this.name = name;
     return this;
-  };
+  }
+
+  public output(): DepartmentOut {
+    return this.toJSON();
+  }
 
   public toJSON(): DepartmentOut {
     return {
