@@ -127,7 +127,7 @@ export default class CRUDStories {
     if (permission.can) {
       if (typeof permission.belongsTo !== 'string' && permission.belongsTo?.name) {
         /* -------------------------------------------------------------------------- */
-        /*                            Belongs to a  model.                            */
+        /*                            Belongs to a model.                             */
         /* -------------------------------------------------------------------------- */
         const modelName = permission.belongsTo.name?.toLocaleLowerCase();
 
@@ -137,15 +137,13 @@ export default class CRUDStories {
 
         // As a Author, I want to only read comments that are connected to my book
         // As a Business Owner, I want to only read reviews that are connected to my Business
-        this._addStory(
-          new UserStory({
-            asA: permission.userType,
-            iWant: `to only read ${model.name}s that are connected to my ${modelName}`,
-          }).addTask(belongToTask),
-        );
-      }
+        const story1 = new UserStory({
+          asA: permission.userType,
+          iWant: `to only read ${model.name}s that are connected to my ${modelName}`,
+        }).addTask(belongToTask);
 
-      if (permission.belongsTo === 'owner') {
+        this._addStory(story1);
+      } else if (permission.belongsTo === 'owner') {
         /* -------------------------------------------------------------------------- */
         /*                           Only the owner can read                          */
         /* -------------------------------------------------------------------------- */
@@ -174,6 +172,9 @@ export default class CRUDStories {
           }),
         );
       } else {
+        /* -------------------------------------------------------------------------- */
+        /*                               No Permissions                               */
+        /* -------------------------------------------------------------------------- */
         this._addStory(
           new UserStory({
             asA: permission.userType,
@@ -181,46 +182,47 @@ export default class CRUDStories {
             soICan: `see an overview of all ${model.name}s`,
           }),
         );
+      }
 
-        if (this.canFilterList) {
-          this._addStory(
-            new UserStory({
-              asA: permission.userType,
-              iWant: `to be able to filter ${model.name}s`,
-              soICan: `easily find the ${model.name} I am looking for`,
-            }),
-          );
-        }
-
-        if (this.canSortList) {
-          this._addStory(
-            new UserStory({
-              asA: permission.userType,
-              iWant: `to be able to sort ${model.name}s`,
-              soICan: '',
-            }),
-          );
-        }
-
-        if (this.canPaginateList) {
-          this._addStory(
-            new UserStory({
-              asA: permission.userType,
-              iWant: `to be able to paginate ${model.name}s`,
-              soICan: '',
-            }),
-          );
-        }
-
+      if (this.canFilterList) {
         this._addStory(
           new UserStory({
             asA: permission.userType,
-            iWant: `to see a single ${model.name?.toLocaleLowerCase()}`,
-            soICan: 'see more in depth information',
+            iWant: `to be able to filter ${model.name}s`,
+            soICan: `easily find the ${model.name} I am looking for`,
           }),
         );
       }
-    } else if (!permission.can) {
+
+      if (this.canSortList) {
+        this._addStory(
+          new UserStory({
+            asA: permission.userType,
+            iWant: `to be able to sort ${model.name}s`,
+            soICan: '',
+          }),
+        );
+      }
+
+      if (this.canPaginateList) {
+        this._addStory(
+          new UserStory({
+            asA: permission.userType,
+            iWant: `to be able to paginate ${model.name}s`,
+            soICan: '',
+          }),
+        );
+      }
+
+      this._addStory(
+        new UserStory({
+          asA: permission.userType,
+          iWant: `to see a single ${model.name?.toLocaleLowerCase()}`,
+          soICan: 'see more in depth information',
+        }),
+      );
+    }
+    if (!permission.can) {
       this._addStory(
         new UserStory({
           asA: permission.userType,
