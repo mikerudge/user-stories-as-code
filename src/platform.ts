@@ -1,5 +1,6 @@
 import uniqid from 'uniqid';
 import Meta from './Meta';
+import UserStory from './userStory';
 
 export type PlatformParams = {
   name: string;
@@ -26,6 +27,7 @@ export type PlatformOut = {
 export default class Platform implements Meta {
   name: string;
   description: string;
+  userStories = new Set<UserStory>();
   id: string;
 
   constructor(params?: PlatformParams) {
@@ -41,6 +43,20 @@ export default class Platform implements Meta {
 
   public setDescription(description: string): Platform {
     this.description = description;
+    return this;
+  }
+
+  private _addStory(story: UserStory): void {
+    story.setPlatform(this);
+    this.userStories.add(story);
+  }
+
+  public addStory(story: UserStory | UserStory[]): Platform {
+    if (Array.isArray(story)) {
+      story.forEach((s) => this._addStory(s));
+    } else {
+      this._addStory(story);
+    }
     return this;
   }
 

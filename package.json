@@ -1,6 +1,6 @@
 {
   "name": "user-stories-as-code",
-  "version": "0.0.14-alpha",
+  "version": "0.0.15-alpha",
   "description": "A package for generating user stories using only typescript",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

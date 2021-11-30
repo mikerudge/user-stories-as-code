@@ -163,15 +163,21 @@ export default class Project implements Meta {
     }
 
     if (story.epic) {
-      this.addEpic(story.epic);
+      if (!this.epics.has(story.epic)) {
+        this.addEpic(story.epic);
+      }
     }
 
     if (story.platform) {
-      this.addPlatform(story.platform);
+      if (!this.platforms.has(story.platform)) {
+        this.addPlatform(story.platform);
+      }
     }
 
     if (story.sprint) {
-      this.sprints.add(story.sprint);
+      if (!this.sprints.has(story.sprint)) {
+        this.addSprint(story.sprint);
+      }
     }
 
     if (story.assignee.size > 0) {
@@ -234,6 +240,19 @@ export default class Project implements Meta {
     return this;
   }
 
+  private _addPlatformToProject(platform: Platform): void {
+    if (!this.platforms.has(platform)) {
+      if (platform.userStories.size > 0) {
+        platform.userStories.forEach((story) => {
+          if (!this.stories.has(story)) {
+            this._addStoryToProject(story);
+          }
+        });
+      }
+
+      this.platforms.add(platform);
+    }
+  }
   /**
    * @description add a platform to the project
    * @author Mike Rudge
@@ -243,9 +262,9 @@ export default class Project implements Meta {
    */
   public addPlatform(platform: Platform | Platform[]): Project {
     if (Array.isArray(platform)) {
-      platform.forEach((p) => this.platforms.add(p));
+      platform.forEach((p) => this._addPlatformToProject(p));
     } else {
-      this.platforms.add(platform);
+      this._addPlatformToProject(platform);
     }
     return this;
   }
