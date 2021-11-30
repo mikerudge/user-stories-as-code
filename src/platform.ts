@@ -1,19 +1,36 @@
 import uniqid from 'uniqid';
+import Meta from './Meta';
 
-export type PlatformProps = {
+export type PlatformParams = {
   name: string;
+  description?: string;
 };
 
 export type PlatformOut = {
   id: string;
-} & PlatformProps;
+} & PlatformParams;
 
-export default class Platform {
+/**
+ * Platform allows you to define the platforms that are going to be developed in this project.
+ * For example you may have web application, mobile app and chat bot.
+ *
+ * @example
+ *```ts
+ * const web = new Platform({name: "Web", description: "The web application"});
+ *```
+ *
+ * @author Mike Rudge
+ * @date 28/11/2021
+ * @class Platform
+ */
+export default class Platform implements Meta {
   name: string;
+  description: string;
   id: string;
 
-  constructor(props?: PlatformProps) {
-    this.name = props?.name ?? '';
+  constructor(params?: PlatformParams) {
+    this.name = params?.name ?? '';
+    this.description = params?.description ?? '';
     this.id = uniqid();
   }
 
@@ -22,10 +39,16 @@ export default class Platform {
     return this;
   }
 
+  public setDescription(description: string): Platform {
+    this.description = description;
+    return this;
+  }
+
   private toJSON(): PlatformOut {
     return {
       id: this.id,
       name: this.name,
+      description: this.description,
     };
   }
 

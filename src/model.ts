@@ -1,10 +1,12 @@
 import uniqid from 'uniqid';
+import Meta from './Meta';
 
 import Permission, { Action, PermissionOutput } from './permission';
 import UserType, { UserTypeOutput } from './userType';
 
-type ModelProps = {
+type ModelParams = {
   name?: string;
+  description?: string;
   permissions?: Permission[] | UserType[] | [Permission, UserType] | Permission | UserType;
   relations?: Model | Model[];
 };
@@ -12,32 +14,66 @@ type ModelProps = {
 export type ModelOutput = {
   id: string;
   name: string;
+  description: string;
   permissions?: PermissionOutput[];
   userTypes?: UserTypeOutput[];
 };
 
-export default class Model {
+/**
+ * You can think of models as collections in MongoDB or tables in SQL.
+ * They are at a high level the major data points, for example `users` `books` `comments`
+ *
+ * @example
+ *```ts
+ * new Model({name: "Book", permissions: [new Permission({...})]})
+ *```
+ * @remarks
+ * You can also add a user to the permissions array, this will then use the default permissions of that {@link UserType}
+ *
+ * @example
+ *```ts
+ * new Model({name: "Book", permissions: [new Permission({...}), new UserType({...})]})
+ * // or you can use chain methods
+ * const admin = new UserType({...})
+ * const authorPermissions = new Permission({...})
+ * new Model({name: "Comment"}).addPermission(admin).addPermission(authorPermissions)
+ * // addPermission also accepts an array of userTypes and permissions
+ * new Model({name: "Review"}).addPermission([admin, authorPermission])
+ *```
+ * @author Mike Rudge
+ * @date 28/11/2021
+ * @export
+ * @class Model
+ */
+export default class Model implements Meta {
   id: string;
-  name: string | undefined;
+  name: string;
   permissions: Set<Permission>;
   userTypes: Set<UserType>;
   actions: Set<Action> = new Set();
   relations: Set<Model> = new Set();
+  description: string;
 
-  constructor(props?: ModelProps) {
+  constructor(params?: ModelParams) {
     this.id = uniqid();
-    this.name = props?.name;
+    this.name = params?.name ?? '';
+    this.description = params?.description ?? '';
     this.userTypes = new Set();
 
     this.permissions = new Set();
 
-    if (props?.permissions) {
-      this.addPermission(props.permissions);
+    if (params?.permissions) {
+      this.addPermission(params.permissions);
     }
 
-    if (props?.relations) {
-      this.addRelation(props.relations);
+    if (params?.relations) {
+      this.addRelation(params.relations);
     }
+  }
+
+  public setDescription(description: string): Model {
+    this.description = description;
+    return this;
   }
 
   private readonly _addRelation = (relation: Model) => {
@@ -145,6 +181,7 @@ export default class Model {
     return {
       id: this.id,
       name: this.name ?? '',
+      description: this.description ?? '',
       permissions: permissions,
       userTypes: userTypes,
     };

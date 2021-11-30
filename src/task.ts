@@ -3,7 +3,7 @@ import uniqid from 'uniqid';
 import TeamMember, { TeamMemberOutput } from './teamMember';
 import UserStory from './userStory';
 
-export type TaskProps = {
+export type TaskParams = {
   title: string;
   description?: string;
   priority?: number;
@@ -14,8 +14,30 @@ export type TaskProps = {
 export type TaskOut = {
   id: string;
   assignee?: TeamMemberOutput[];
-} & Omit<TaskProps, 'assignee'>;
+} & Omit<TaskParams, 'assignee'>;
 
+/**
+ * A task is for when the format of a user story doesn't make sense.
+ * For example you might have a task on the project for setting up the GitHub repo.
+ *
+ * @example
+ *```ts
+ * const task = new Task({
+ * title: 'Create GitHub repo',
+ * description: 'Set a repo on the company GitHub account called...',
+ * status: 'TODO',
+ * priority: 2,
+ * assignee: [james],
+ *  });
+ *```
+ * @see - {@link Project}
+ * @see - {@link UserStory}
+ *
+ * @author Mike Rudge
+ * @date 28/11/2021
+ * @export
+ * @class Task
+ */
 export default class Task {
   id: string;
   title: string;
@@ -23,12 +45,12 @@ export default class Task {
   priority: number | undefined;
   status: string | undefined;
   assignee: Set<TeamMember>;
-  constructor(props?: TaskProps) {
+  constructor(params?: TaskParams) {
     this.id = uniqid();
-    this.title = props?.title ?? '';
-    this.priority = props?.priority;
-    this.status = props?.status;
-    this.assignee = new Set(props?.assignee);
+    this.title = params?.title ?? '';
+    this.priority = params?.priority;
+    this.status = params?.status;
+    this.assignee = new Set(params?.assignee);
   }
 
   setTitle(title: string): Task {

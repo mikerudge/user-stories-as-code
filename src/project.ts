@@ -3,6 +3,7 @@ import uniqid from 'uniqid';
 
 import Department, { DepartmentOut } from './department';
 import Epic, { EpicOutput } from './epic';
+import Meta from './Meta';
 import Milestone, { MilestoneOutput } from './milestone';
 import Model, { ModelOutput } from './model';
 import Platform, { PlatformOut } from './platform';
@@ -15,17 +16,18 @@ import UserType, { UserTypeOutput } from './userType';
 export type ProjectOptions = {
   defaultPoints?: number;
 };
-export type ProjectProps = {
+export type ProjectParams = {
   name: string;
+  description?: string;
   key?: string;
   userTypes?: UserType[];
   owner?: TeamMember;
-  stories?: UserStory[];
+  stories?: UserStory[] | UserStory;
   models?: Model[];
   sprints?: Sprint[];
   epics?: Epic[];
   departments?: Department[];
-  milestones?: Milestone[];
+  milestones?: Milestone[] | Milestone;
   teamMembers?: TeamMember[];
   tasks?: Task[];
   options?: ProjectOptions;
@@ -35,6 +37,7 @@ export type ProjectProps = {
 export type ProjectOutput = {
   id: string;
   name: string;
+  description?: string;
   key: string;
   models: ModelOutput[];
   milestones: MilestoneOutput[];
@@ -55,39 +58,79 @@ export type ProjectOutput = {
   totalTeamMembers: number;
 };
 
-export default class Project {
+/**
+ * The project class is the main class that pulls together everything and then exports it.
+ * Add all the stories, models, sprints, etc. and then output the project.
+ *
+ * @example - Full Example
+ *```ts
+ * new Project({name: 'My Project',
+ * key: 'MYP',
+ * userTypes: [userType],
+ * owner: owner,
+ * stories: [userStory],
+ * models: [model],
+ * sprints: [sprint],
+ * epics: [epic],
+ * departments: [department],
+ * milestones: [milestone],
+ * teamMembers: [teamMember],
+ * tasks: [task]})
+ *```
+ * @author Mike Rudge
+ * @date 28/11/2021
+ * @class Project
+ */
+export default class Project implements Meta {
   public readonly id: string;
-  public readonly name: string = '';
+  public name: string;
+  public description: string;
   public owner: TeamMember | undefined;
   public platforms: Set<Platform> = new Set();
-  public sprints: Set<Sprint> = new Set();
-  public stories: Set<UserStory>;
+  public sprints = new Set<Sprint>();
+  public stories = new Set<UserStory>();
   public tasks: Set<Task>;
   public teamMembers: Set<TeamMember>;
   public userTypes: Set<UserType> = new Set();
   public models: Set<Model>;
   public defaultPoints: number;
   public departments: Set<Department> = new Set();
-  public epics: Set<Epic> = new Set();
+  public epics = new Set<Epic>();
   public key: string;
-  public milestones: Set<Milestone>;
+  public milestones = new Set<Milestone>();
 
-  constructor(props: ProjectProps, options: ProjectOptions = {}) {
+  constructor(params: ProjectParams, options: ProjectOptions = {}) {
     this.id = uniqid();
-    this.name = props.name;
-    this.userTypes = new Set(props.userTypes);
-    this.stories = new Set(props.stories);
-    this.milestones = new Set(props.milestones);
-    this.key = props.key || props.name.slice(0, 3).toUpperCase();
-    this.teamMembers = new Set(props.teamMembers);
-    this.owner = props.owner;
-    this.tasks = new Set(props.tasks);
+    this.name = params.name;
+    this.userTypes = new Set(params.userTypes);
+    if (params.stories) {
+      this.addStory(params.stories);
+    }
+
+    if (params.milestones) {
+      this.addMilestone(params.milestones);
+    }
+    this.key = params.key || params.name.slice(0, 3).toUpperCase();
+    this.teamMembers = new Set(params.teamMembers);
+    this.owner = params.owner;
+    this.tasks = new Set(params.tasks);
     this.defaultPoints = options.defaultPoints || 0;
-    this.departments = new Set(props.departments);
-    this.platforms = new Set(props.platforms);
-    this.sprints = new Set(props.sprints);
-    this.epics = new Set(props.epics);
-    this.models = new Set(props.models);
+    this.departments = new Set(params.departments);
+    this.platforms = new Set(params.platforms);
+    this.sprints = new Set(params.sprints);
+    this.epics = new Set(params.epics);
+    this.models = new Set(params.models);
+    this.description = params.description || '';
+  }
+
+  public setName(name: string): Project {
+    this.name = name;
+    return this;
+  }
+
+  public setDescription(description: string): Project {
+    this.description = description;
+    return this;
   }
 
   public addModel(model: Model | Model[]): Project {
@@ -257,7 +300,7 @@ export default class Project {
 
   /**
    * @description Allows users to add a new user type to the project
-   * @param params UserTypeProps
+   * @param params UserTypeParams
    * @returns
    */
   public addUserType(userType: UserType | UserType[]): Project {
@@ -329,6 +372,7 @@ export default class Project {
       id: this.id,
       key: this.key,
       name: this.name,
+      description: this.description,
       milestones: milestones,
       stories: stories,
       userTypes: userTypes,

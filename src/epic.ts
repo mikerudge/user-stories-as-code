@@ -1,8 +1,9 @@
 import uniqid from 'uniqid';
+import Meta from './Meta';
 
 import Milestone, { MilestoneOutput } from './milestone';
 
-type EpicProps = {
+type EpicParams = {
   name?: string;
   description?: string;
   color?: string;
@@ -12,21 +13,37 @@ type EpicProps = {
 export type EpicOutput = {
   id: string;
   milestone: MilestoneOutput | undefined;
-} & Omit<EpicProps, 'milestone'>;
+} & Omit<EpicParams, 'milestone'>;
 
-export default class Epic {
+/**
+ * Creating an epic allows you to group your user stories.
+ *
+ * @example
+ *```ts
+ * new Epic({ name: 'Authentication', description: "Authentication for all users", color: "blue",  milestone: new Milestone({...}) });
+ *```
+ * @remarks
+ * Epics added to {@link UserStory} will automatically be added to the project as well.
+ *
+ * @author Mike Rudge
+ * @date 27/11/2021
+ * @class Epic
+ */
+export default class Epic implements Meta {
   id: string;
   name: string;
   description: string;
   color: string;
   milestone: Milestone | undefined;
 
-  constructor(public params?: EpicProps) {
+  constructor(public params?: EpicParams) {
     this.id = uniqid();
     this.name = params?.name ?? '';
     this.description = params?.description ?? '';
     this.color = params?.color ?? '';
-    this.milestone = params?.milestone;
+    if (params?.milestone) {
+      this.setMilestone(params.milestone);
+    }
   }
 
   /**

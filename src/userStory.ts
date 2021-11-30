@@ -1,4 +1,5 @@
 import uniqid from 'uniqid';
+import AcceptanceCriteria from './acceptanceCriteria';
 
 import Department, { DepartmentOut } from './department';
 import Epic, { EpicOutput } from './epic';
@@ -8,7 +9,7 @@ import Task, { TaskOut } from './task';
 import TeamMember from './teamMember';
 import UserType, { UserTypeOutput } from './userType';
 
-export type UserStoryProps = {
+export type UserStoryParams = {
   iWant?: string;
   asA?: UserType;
   soICan?: string;
@@ -23,6 +24,7 @@ export type UserStoryProps = {
   key?: string;
   assignee?: TeamMember[];
   tasks?: Task[];
+  acceptanceCriteria?: AcceptanceCriteria;
 };
 export type UserStoryOutput = {
   id: string;
@@ -33,8 +35,48 @@ export type UserStoryOutput = {
   departments?: DepartmentOut[];
   userType: UserTypeOutput | undefined;
   epic?: EpicOutput;
-} & Omit<UserStoryProps, 'asA' | 'tasks' | 'platform' | 'departments' | 'epic'>;
+  acceptanceCriteria: string;
+  labels: string[];
+} & Omit<UserStoryParams, 'asA' | 'tasks' | 'platform' | 'departments' | 'epic' | 'acceptanceCriteria' | 'labels'>;
 
+/**
+ * The UserStory class represents a user story and all of its properties. The `summary` property is the constructed user story string.
+ *
+ * The user story is made up of three main properties: `asA`, `iWant`, and `soICan`.
+ *
+ * @example
+ *```ts
+ * const author = new UserType({...})
+ * const userStory = new UserStory({asA: author, iWant: 'To be able to do something', soICan: 'Do that'});
+ * const project = new Project({...}).addStory(userStory)
+ *```
+ * @example - Full Example
+ *```ts
+ * new UserStory({
+ * asA: admin,
+ * iWant: 'To be able to do something',
+ * soICan: 'Do that',
+ * key: 'key', // this will be automatically set from the project name if not explicitly set
+ * description: 'This is a description',
+ * points: 1,
+ * labels: ['label1', 'label2'],
+ * dueDate: new Date(),
+ * acceptanceCriteria: new AcceptanceCriteria({...}),
+ * sprint: new Sprint({...}),
+ * platform: new Platform({...}),
+ * epic: new Epic({...}),
+ * departments: [new Department({...}), new Department({...})],
+ * assignee: [new TeamMember({...}), new TeamMember({...})],
+ * tasks: [new Task({...}), new Task({...})]
+ * })
+ *```
+ * @see {@link Project}
+ *
+ * @author Mike Rudge
+ * @date 28/11/2021
+ * @export
+ * @class UserStory
+ */
 export default class UserStory {
   public readonly id: string = uniqid();
   public iWant: string;
@@ -52,92 +94,99 @@ export default class UserStory {
   public points: number;
   public key: string;
   public assignee: Set<TeamMember>;
+  public acceptanceCriteria?: AcceptanceCriteria;
 
-  constructor(public props?: UserStoryProps) {
-    this.points = props?.points ?? 0;
-    this.iWant = props?.iWant ?? 'New User Story';
-    this.asA = props?.asA;
-    this.soICan = props?.soICan ?? '';
-    this.description = props?.description;
-    this.labels = new Set(props?.labels);
-    this.platform = props?.platform;
-    this.dueDate = props?.dueDate;
-    this.tasks = new Set(props?.tasks);
-    this.epic = props?.epic;
-    this.departments = new Set(props?.departments);
+  constructor(public params?: UserStoryParams) {
+    this.points = params?.points ?? 0;
+    this.iWant = params?.iWant ?? 'New User Story';
+    this.asA = params?.asA;
+    this.soICan = params?.soICan ?? '';
+    this.description = params?.description;
+    this.labels = new Set(params?.labels);
+    this.platform = params?.platform;
+    this.dueDate = params?.dueDate;
+    this.tasks = new Set(params?.tasks);
+    this.epic = params?.epic;
+    this.departments = new Set(params?.departments);
     this.summary = this._generateSummary();
-    this.sprint = props?.sprint;
-    this.key = props?.key ?? '';
-    this.assignee = new Set(props?.assignee);
+    this.sprint = params?.sprint;
+    this.key = params?.key ?? '';
+    this.assignee = new Set(params?.assignee);
+    this.acceptanceCriteria = params?.acceptanceCriteria;
   }
 
-  public readonly addLabel = (label: string | string[]): UserStory => {
+  public setAcceptanceCriteria(acceptanceCriteria: AcceptanceCriteria): UserStory {
+    this.acceptanceCriteria = acceptanceCriteria;
+    return this;
+  }
+
+  public addLabel(label: string | string[]): UserStory {
     if (typeof label === 'string') {
       this.labels?.add(label);
     } else {
       label.forEach((l) => this.labels?.add(l));
     }
     return this;
-  };
+  }
 
-  public readonly setDueDate = (date: Date): UserStory => {
+  public setDueDate(date: Date): UserStory {
     this.dueDate = date;
     return this;
-  };
+  }
 
-  public readonly setKey = (key: string): UserStory => {
+  public setKey(key: string): UserStory {
     this.key = key;
     return this;
-  };
+  }
 
-  public readonly setPoints = (points: number): UserStory => {
+  public setPoints(points: number): UserStory {
     this.points = points;
     return this;
-  };
+  }
 
-  public readonly addAssignee = (assignee: TeamMember | TeamMember[]): UserStory => {
+  public addAssignee(assignee: TeamMember | TeamMember[]): UserStory {
     if (Array.isArray(assignee)) {
       assignee.forEach((member) => this?.assignee?.add(member));
     } else {
       this.assignee?.add(assignee);
     }
     return this;
-  };
+  }
 
-  public readonly setAsA = (who: UserType): UserStory => {
+  public setAsA(who: UserType): UserStory {
     this.asA = who;
     this._generateSummary();
     return this;
-  };
+  }
 
-  public setIWant = (what: string): UserStory => {
+  public setIWant(what: string): UserStory {
     this.iWant = what;
     this._generateSummary();
 
     return this;
-  };
+  }
 
-  public readonly setSoICan = (why: string): UserStory => {
+  public setSoICan(why: string): UserStory {
     this.soICan = why;
     this._generateSummary();
 
     return this;
-  };
+  }
 
-  public readonly setPlatform = (platform: Platform): UserStory => {
+  public setPlatform(platform: Platform): UserStory {
     this.platform = platform;
     return this;
-  };
+  }
 
-  public readonly setSprint = (sprint: Sprint): UserStory => {
+  public setSprint(sprint: Sprint): UserStory {
     this.sprint = sprint;
     return this;
-  };
+  }
 
-  public readonly setEpic = (epic: Epic): UserStory => {
+  public setEpic(epic: Epic): UserStory {
     this.epic = epic;
     return this;
-  };
+  }
 
   /**
    * @description
@@ -146,7 +195,7 @@ export default class UserStory {
    * @param {Task} task
    * @memberof UserStory
    */
-  public readonly addTask = (task: Task | Task[]): UserStory => {
+  public addTask(task: Task | Task[]): UserStory {
     if (Array.isArray(task)) {
       task.forEach((task) => this.tasks.add(task));
     } else {
@@ -154,9 +203,9 @@ export default class UserStory {
     }
 
     return this;
-  };
+  }
 
-  public readonly addDepartment = (department: Department | Department[]): UserStory => {
+  public addDepartment(department: Department | Department[]): UserStory {
     if (Array.isArray(department)) {
       department.forEach((d) => this.departments.add(d));
     } else {
@@ -164,7 +213,7 @@ export default class UserStory {
     }
 
     return this;
-  };
+  }
 
   // Capitalise the first letter of a string
   private readonly _capitalise = (input: string): string => {
@@ -190,7 +239,7 @@ export default class UserStory {
     return this.summary;
   };
 
-  public readonly toJSON = (): UserStoryOutput => {
+  public toJSON(): UserStoryOutput {
     this._generateSummary();
 
     const out: UserStoryOutput = {
@@ -199,6 +248,7 @@ export default class UserStory {
       key: this.key,
       summary: this.summary?.toString() ?? '',
       description: this.description?.toString() ?? '',
+      acceptanceCriteria: this.acceptanceCriteria?.generate() ?? '',
       userType: this.asA?.toJSON(),
       asA: this.asA?.name ?? '',
       iWant: this.iWant?.toString(),
@@ -213,9 +263,9 @@ export default class UserStory {
     };
 
     return out;
-  };
+  }
 
-  public readonly output = (): UserStoryOutput => {
+  public output(): UserStoryOutput {
     if (!this.iWant) {
       throw new Error('No user type specified');
     }
@@ -227,5 +277,5 @@ export default class UserStory {
     return this.toJSON();
 
     // return this.summary;
-  };
+  }
 }

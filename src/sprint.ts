@@ -1,4 +1,5 @@
 import uniqid from 'uniqid';
+import Meta from './Meta';
 
 type SprintParams = {
   name: string;
@@ -11,17 +12,26 @@ export type SprintOut = {
   id: string;
 } & SprintParams;
 
-export default class Sprint {
+/**
+ * A sprint is a period of time between a start date and an end date.
+ * @author Mike Rudge
+ * @date 28/11/2021
+ * @export
+ * @class Sprint
+ */
+export default class Sprint implements Meta {
   public id: string;
   public name: string;
   public startDate: Date;
   public endDate: Date;
+  public description: string;
 
   constructor(params?: SprintParams) {
     this.id = uniqid();
     this.name = params?.name ?? '';
     this.startDate = params?.startDate ?? new Date();
     this.endDate = params?.endDate ?? new Date();
+    this.description = params?.description ?? '';
   }
 
   public getId(): string {
@@ -41,6 +51,11 @@ export default class Sprint {
     return this;
   }
 
+  public setDescription(description: string): Sprint {
+    this.description = description;
+    return this;
+  }
+
   public setStartDate(startDate: Date): Sprint {
     this.startDate = startDate;
     return this;
@@ -55,6 +70,7 @@ export default class Sprint {
     return {
       id: this.id,
       name: this.name,
+      description: this.description,
       startDate: this.startDate,
       endDate: this.endDate,
     };
